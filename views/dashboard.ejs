@@ -1952,7 +1952,7 @@
       if (stream.status === 'live' && stream.start_time) {
         const startTime = new Date(stream.start_time);
         const now = new Date();
-        const durationMs = now - startTime;
+        const durationMs = Math.max(0, now - startTime);
         const hours = Math.floor(durationMs / (1000 * 60 * 60)).toString().padStart(2, '0');
         const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
         const seconds = Math.floor((durationMs % (1000 * 60)) / 1000).toString().padStart(2, '0');
@@ -2067,7 +2067,7 @@
       if (stream.status === 'live' && stream.start_time) {
         const startTime = new Date(stream.start_time);
         const now = new Date();
-        const durationMs = now - startTime;
+        const durationMs = Math.max(0, now - startTime);
         const hours = Math.floor(durationMs / (1000 * 60 * 60)).toString().padStart(2, '0');
         const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
         const seconds = Math.floor((durationMs % (1000 * 60)) / 1000).toString().padStart(2, '0');
@@ -3950,7 +3950,7 @@
         document.querySelectorAll('.live-duration').forEach(el => {
           const startTime = new Date(el.dataset.startTime);
           const now = new Date();
-          const durationMs = now - startTime;
+          const durationMs = Math.max(0, now - startTime);
           const hours = Math.floor(durationMs / (1000 * 60 * 60)).toString().padStart(2, '0');
           const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
           const seconds = Math.floor((durationMs % (1000 * 60)) / 1000).toString().padStart(2, '0');
