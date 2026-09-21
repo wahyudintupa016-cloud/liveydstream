@@ -202,6 +202,15 @@ http://IP_SERVER:PORT
 
 Contoh: `http://88.12.34.56:7575`
 
+## 🔄 Cara Update ke Versi Terbaru
+
+Jika sudah pernah menginstal dan ingin memperbarui aplikasi ke versi kode terbaru:
+
+```bash
+cd ~/liveydstream
+git pull origin main
+pm2 restart liveydstream
+```
 
 ## 🔐 Reset Password
 

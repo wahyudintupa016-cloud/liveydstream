@@ -48,10 +48,9 @@ fi
 
 if [ ! -f "app.js" ]; then
     echo "📥 Clone repository..."
-    if [ -n "$1" ]; then
-        git clone "$1" streamflow
-        cd streamflow
-    fi
+    REPO_URL="${1:-https://github.com/wahyudintupa016-cloud/liveydstream.git}"
+    git clone "$REPO_URL" liveydstream
+    cd liveydstream
 fi
 
 echo "⚙️ Installing dependencies..."
