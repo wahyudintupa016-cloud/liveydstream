@@ -256,14 +256,14 @@ app.use('/uploads/avatars', (req, res, next) => {
   }
 });
 const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 5,
+  windowMs: 2 * 60 * 1000,
+  max: 30,
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res) => {
     res.status(429).render('login', {
       title: 'Login',
-      error: 'Too many login attempts. Please try again in 15 minutes.'
+      error: 'Too many login attempts. Please try again in 2 minutes.'
     });
   },
   requestWasSuccessful: (request, response) => {
