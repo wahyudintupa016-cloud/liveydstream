@@ -683,6 +683,7 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
       youtubeChannelThumbnail: defaultChannel?.channel_thumbnail || '',
       youtubeSubscriberCount: defaultChannel?.subscriber_count || '0',
       hasYoutubeCredentials: hasYoutubeCredentials,
+      serverTime: new Date().toISOString(),
       initialStreams: JSON.stringify(initialStreamsData.streams),
       initialPagination: JSON.stringify(initialStreamsData.pagination)
     });

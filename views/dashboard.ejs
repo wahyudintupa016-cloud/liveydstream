@@ -1289,6 +1289,16 @@
     const initialStreamsData = <%- typeof initialStreams !== 'undefined' ? initialStreams : '[]' %>;
     const initialPaginationData = <%- typeof initialPagination !== 'undefined' ? initialPagination : '{"page":1,"limit":10,"totalCount":0,"totalPages":0}' %>;
     let initialDataUsed = false;
+    let serverTimeSkewMs = (function() {
+      const serverTimeStr = '<%- typeof serverTime !== "undefined" ? serverTime : "" %>';
+      if (!serverTimeStr) return 0;
+      const parsed = new Date(serverTimeStr).getTime();
+      return isNaN(parsed) ? 0 : (parsed - Date.now());
+    })();
+
+    function getCurrentServerTime() {
+      return new Date(Date.now() + serverTimeSkewMs);
+    }
 
     function showToast(type, message) {
       const toast = document.getElementById('toast');
@@ -2048,7 +2058,7 @@
       let durationDisplay = '';
       if (stream.status === 'live' && stream.start_time) {
         const startTime = new Date(stream.start_time);
-        const now = new Date();
+        const now = getCurrentServerTime();
         const durationMs = Math.max(0, now - startTime);
         const hours = Math.floor(durationMs / (1000 * 60 * 60)).toString().padStart(2, '0');
         const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
@@ -2180,7 +2190,7 @@
       let statusBadge = '';
       if (stream.status === 'live' && stream.start_time) {
         const startTime = new Date(stream.start_time);
-        const now = new Date();
+        const now = getCurrentServerTime();
         const durationMs = Math.max(0, now - startTime);
         const hours = Math.floor(durationMs / (1000 * 60 * 60)).toString().padStart(2, '0');
         const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
@@ -4089,7 +4099,7 @@
       setInterval(() => {
         document.querySelectorAll('.live-duration').forEach(el => {
           const startTime = new Date(el.dataset.startTime);
-          const now = new Date();
+          const now = getCurrentServerTime();
           const durationMs = Math.max(0, now - startTime);
           const hours = Math.floor(durationMs / (1000 * 60 * 60)).toString().padStart(2, '0');
           const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
@@ -4104,6 +4114,10 @@
       try {
         const response = await fetch('/api/server-time');
         const data = await response.json();
+        if (data.serverTime) {
+          const parsed = new Date(data.serverTime).getTime();
+          if (!isNaN(parsed)) serverTimeSkewMs = parsed - Date.now();
+        }
         if (data.timezoneOffset !== undefined) {
           serverTimezoneOffset = data.timezoneOffset;
         }
@@ -4116,6 +4130,10 @@
       fetch('/api/server-time')
         .then(response => response.json())
         .then(data => {
+          if (data.serverTime) {
+            const parsed = new Date(data.serverTime).getTime();
+            if (!isNaN(parsed)) serverTimeSkewMs = parsed - Date.now();
+          }
           if (data.timezoneOffset !== undefined) {
             serverTimezoneOffset = data.timezoneOffset;
           }
