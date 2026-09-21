@@ -1679,7 +1679,8 @@
               if (data.success) {
                 showToast('success', 'YouTube stream created successfully!');
                 closeNewStreamModal();
-                setTimeout(() => window.location.reload(), 1000);
+                resetCreateBtn();
+                fetchStreams(currentPage, currentLimit, currentSearch);
               } else {
                 showToast('error', data.error || 'Failed to create YouTube stream');
                 resetCreateBtn();
@@ -1704,7 +1705,8 @@
               if (data.success) {
                 showToast('success', 'YouTube stream created successfully!');
                 closeNewStreamModal();
-                setTimeout(() => window.location.reload(), 1000);
+                resetCreateBtn();
+                fetchStreams(currentPage, currentLimit, currentSearch);
               } else {
                 showToast('error', data.error || 'Failed to create YouTube stream');
                 resetCreateBtn();
@@ -1780,9 +1782,7 @@
           if (data.success) {
             showToast('success', 'Stream created successfully!');
             closeNewStreamModal();
-            setTimeout(() => {
-              window.location.reload();
-            }, 1000);
+            fetchStreams(currentPage, currentLimit, currentSearch);
           } else {
             showToast('error', data.error || 'Failed to create stream');
           }
@@ -2391,9 +2391,7 @@
           if (data.success) {
             const streamMode = data.isAdvancedMode ? "Advanced mode" : "Simple mode";
             showToast('success', `Stream started successfully! (${streamMode})`);
-            setTimeout(() => {
-              window.location.reload();
-            }, 1000);
+            fetchStreams(currentPage, currentLimit, currentSearch);
           } else {
             showToast('error', data.error || 'Failed to start stream');
             restoreButtons();
@@ -2433,9 +2431,7 @@
         .then(data => {
           if (data.success) {
             showToast('success', 'Stream stopped successfully!');
-            setTimeout(() => {
-              window.location.reload();
-            }, 1000);
+            fetchStreams(currentPage, currentLimit, currentSearch);
           } else {
             showToast('error', data.error || 'Failed to stop stream');
             restoreButtons();
@@ -2475,9 +2471,7 @@
         .then(data => {
           if (data.success) {
             showToast('success', 'Schedule cancelled successfully!');
-            setTimeout(() => {
-              window.location.reload();
-            }, 1000);
+            fetchStreams(currentPage, currentLimit, currentSearch);
           } else {
             showToast('error', data.error || 'Failed to cancel schedule');
             restoreButtons();
@@ -2488,9 +2482,6 @@
           showToast('error', `An error occurred while cancelling the schedule: ${error.message}`);
           restoreButtons();
         });
-    }
-    function editStream(streamId) {
-      console.log('Edit stream:', streamId);
     }
     async function deleteStream(streamId) {
       if (!streamId) return;
@@ -2516,9 +2507,7 @@
           .then(data => {
             if (data.success) {
               showToast('success', 'Stream deleted successfully');
-              setTimeout(() => {
-                window.location.reload();
-              }, 1000);
+              fetchStreams(currentPage, currentLimit, currentSearch);
             } else {
               showToast('error', data.error || 'Failed to delete stream');
             }
@@ -3806,7 +3795,8 @@
                   if (data.success) {
                     showToast('success', 'Stream updated successfully!');
                     closeEditStreamModal();
-                    setTimeout(() => window.location.reload(), 1000);
+                    resetSaveBtn();
+                    fetchStreams(currentPage, currentLimit, currentSearch);
                   } else {
                     showToast('error', data.error || 'Failed to update stream');
                     resetSaveBtn();
@@ -3831,7 +3821,8 @@
                   if (data.success) {
                     showToast('success', 'Stream updated successfully!');
                     closeEditStreamModal();
-                    setTimeout(() => window.location.reload(), 1000);
+                    resetSaveBtn();
+                    fetchStreams(currentPage, currentLimit, currentSearch);
                   } else {
                     showToast('error', data.error || 'Failed to update stream');
                     resetSaveBtn();
@@ -3888,9 +3879,7 @@
               if (data.success) {
                 showToast('success', 'Stream updated successfully!');
                 closeEditStreamModal();
-                setTimeout(() => {
-                  window.location.reload();
-                }, 1000);
+                fetchStreams(currentPage, currentLimit, currentSearch);
               } else {
                 showToast('error', data.error || 'Failed to update stream');
               }
