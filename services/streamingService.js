@@ -8,11 +8,11 @@ const Stream = require('../models/Stream');
 const Playlist = require('../models/Playlist');
 const Video = require('../models/Video');
 
-let ffmpegPath;
-if (fs.existsSync('/usr/bin/ffmpeg')) {
-  ffmpegPath = '/usr/bin/ffmpeg';
-} else {
-  ffmpegPath = ffmpegInstaller.path;
+function getFfmpegPath() {
+  if (fs.existsSync('/usr/bin/ffmpeg')) {
+    return '/usr/bin/ffmpeg';
+  }
+  return ffmpegInstaller.path;
 }
 
 function shuffleArray(array) {
@@ -52,6 +52,7 @@ function setSchedulerService(service) {
 }
 
 function addStreamLog(streamId, message) {
+  console.log(`[Stream ${streamId ? streamId.substring(0, 8) : 'unknown'}] ${message}`);
   if (!streamLogs.has(streamId)) {
     streamLogs.set(streamId, []);
   }
@@ -444,9 +445,15 @@ async function startStream(streamId, isRetry = false, baseUrl = null) {
 
     addStreamLog(streamId, `Starting FFmpeg process`);
 
-    const ffmpegProcess = spawn(ffmpegPath, ffmpegArgs, {
+    const currentFfmpegPath = getFfmpegPath();
+    const ffmpegProcess = spawn(currentFfmpegPath, ffmpegArgs, {
       detached: false,
       stdio: ['ignore', 'pipe', 'pipe']
+    });
+
+    ffmpegProcess.on('error', (err) => {
+      console.error(`[Stream ${streamId}] FFmpeg error:`, err);
+      addStreamLog(streamId, `FFmpeg error: ${err.message}`);
     });
 
     let startTimeIso;
