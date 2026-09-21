@@ -304,6 +304,7 @@ async function buildFFmpegArgs(stream) {
       '-bsf:a', 'aac_adtstoasc',
       '-f', 'flv',
       '-flvflags', 'no_duration_filesize',
+      '-rw_timeout', '10000000',
       rtmpUrl
     ];
   }
@@ -341,6 +342,7 @@ async function buildFFmpegArgs(stream) {
     '-ac', '2',
     '-f', 'flv',
     '-flvflags', 'no_duration_filesize',
+    '-rw_timeout', '10000000',
     rtmpUrl
   ];
 }
@@ -538,17 +540,21 @@ async function startStream(streamId, isRetry = false, baseUrl = null) {
         }
       }
 
+      const hasTimeRemaining = currentStream && currentStream.end_time && 
+                              (new Date(currentStream.end_time).getTime() > Date.now());
+
       const shouldRetry = signal === 'SIGSEGV' || signal === 'SIGKILL' || signal === 'SIGPIPE' || 
-                          (code !== 0 && code !== null) || (code === null && signal === null);
+                          (code !== 0 && code !== null) || (code === null && signal === null) ||
+                          (code === 0 && (currentStream.loop_video || hasTimeRemaining));
 
       if (shouldRetry && currentStream && currentStream.status !== 'offline') {
         const retryCount = streamRetryCount.get(streamId) || 0;
 
         if (retryCount < MAX_RETRY_ATTEMPTS) {
           streamRetryCount.set(streamId, retryCount + 1);
-          const delay = getRetryDelay(retryCount);
+          const delay = Math.min(2000 * Math.pow(1.3, retryCount), 10000);
 
-          addStreamLog(streamId, `Retry #${retryCount + 1} in ${Math.round(delay / 1000)}s`);
+          addStreamLog(streamId, `Auto-restarting stream (Attempt #${retryCount + 1}) in ${Math.round(delay / 1000)}s`);
 
           setTimeout(async () => {
             try {
@@ -565,8 +571,7 @@ async function startStream(streamId, isRetry = false, baseUrl = null) {
                 }
                 const result = await startStream(streamId, true, baseUrl);
                 if (!result.success) {
-                  await Stream.updateStatus(streamId, 'offline', latestStream.user_id);
-                  cleanupStreamData(streamId);
+                  addStreamLog(streamId, `Restart failed: ${result.error}`);
                 }
               } else {
                 cleanupStreamData(streamId);
@@ -754,6 +759,10 @@ async function syncStreamStatuses() {
             cleanupStreamData(stream.id);
             continue;
           }
+          // End time has not arrived yet: resurrect the stream
+          console.log(`[Sync] Resurrecting stream ${stream.id} because end_time is still in future`);
+          startStream(stream.id, true);
+          continue;
         }
 
         await Stream.updateStatus(stream.id, 'offline', stream.user_id, { preserveEndTime: true });
@@ -782,8 +791,12 @@ async function syncStreamStatuses() {
 
       if (streamData.process && streamData.process.exitCode !== null) {
         activeStreams.delete(streamId);
-        await Stream.updateStatus(streamId, 'offline', stream.user_id);
-        cleanupStreamData(streamId);
+        if (stream.end_time && new Date(stream.end_time).getTime() > Date.now()) {
+          startStream(streamId, true);
+        } else {
+          await Stream.updateStatus(streamId, 'offline', stream.user_id);
+          cleanupStreamData(streamId);
+        }
       }
     }
   } catch (error) {}
@@ -791,59 +804,32 @@ async function syncStreamStatuses() {
 
 async function healthCheckStreams() {
   try {
-    const now = Date.now();
-    const staleThreshold = 5 * 60 * 1000;
-
     for (const [streamId, streamData] of activeStreams) {
       if (streamData.process && streamData.process.exitCode !== null) {
         activeStreams.delete(streamId);
         const stream = await Stream.findById(streamId);
         if (stream && stream.status === 'live') {
-          if (stream.end_time) {
-            const endTime = new Date(stream.end_time);
-            if (endTime.getTime() <= Date.now()) {
-              await Stream.updateStatus(streamId, 'offline', stream.user_id);
-              cleanupStreamData(streamId);
-              continue;
-            }
+          if (stream.end_time && new Date(stream.end_time).getTime() <= Date.now()) {
+            await Stream.updateStatus(streamId, 'offline', stream.user_id);
+            cleanupStreamData(streamId);
+            continue;
           }
-          await Stream.updateStatus(streamId, 'offline', stream.user_id, { preserveEndTime: true });
+          addStreamLog(streamId, 'Process exited unexpectedly, auto-restarting...');
+          startStream(streamId, true);
         }
         cleanupStreamData(streamId);
         continue;
       }
 
-      if (streamData.lastActivity && (now - streamData.lastActivity) > staleThreshold) {
-        addStreamLog(streamId, 'Stream appears stale, restarting...');
-        
-        const stream = await Stream.findById(streamId);
-        if (stream && stream.status === 'live') {
-          if (stream.end_time) {
-            const endTime = new Date(stream.end_time);
-            if (endTime.getTime() <= Date.now()) {
-              manuallyStoppingStreams.add(streamId);
-              await killFFmpegProcess(streamId, streamData);
-              activeStreams.delete(streamId);
-              manuallyStoppingStreams.delete(streamId);
-              await Stream.updateStatus(streamId, 'offline', stream.user_id);
-              cleanupStreamData(streamId);
-              continue;
-            }
-          }
-          
-          manuallyStoppingStreams.add(streamId);
-          await killFFmpegProcess(streamId, streamData);
+      // Check if process PID is actually alive in OS
+      if (streamData.pid) {
+        try {
+          process.kill(streamData.pid, 0);
+          streamData.lastActivity = Date.now();
+        } catch (e) {
           activeStreams.delete(streamId);
-          manuallyStoppingStreams.delete(streamId);
-          
-          setTimeout(async () => {
-            try {
-              const currentStream = await Stream.findById(streamId);
-              if (currentStream && currentStream.status === 'live') {
-                await startStream(streamId, true);
-              }
-            } catch (e) {}
-          }, 3000);
+          addStreamLog(streamId, 'Process lost, auto-restarting...');
+          startStream(streamId, true);
         }
       }
     }
