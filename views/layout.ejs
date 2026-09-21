@@ -771,94 +771,78 @@
     }
   }
 
-  let serverTimeOffset = 0;
-  let serverTimezoneOffset = null;
-  let serverTimeInterval = null;
+  (function initNavbarClockModule() {
+    let serverTimeOffset = 0;
+    let serverTimezoneOffset = null;
+    let serverTimeInterval = null;
 
-  function updateServerTimeDisplay() {
-    try {
-      const now = new Date(Date.now() + serverTimeOffset);
-      let targetDate = now;
-      if (serverTimezoneOffset !== null && !isNaN(serverTimezoneOffset)) {
-        const clientOffset = now.getTimezoneOffset();
-        const diffMinutes = clientOffset - serverTimezoneOffset;
-        targetDate = new Date(now.getTime() + diffMinutes * 60000);
+    function updateServerTimeDisplay() {
+      try {
+        const now = new Date(Date.now() + serverTimeOffset);
+        let targetDate = now;
+        if (serverTimezoneOffset !== null && !isNaN(serverTimezoneOffset)) {
+          const clientOffset = now.getTimezoneOffset();
+          const diffMinutes = clientOffset - serverTimezoneOffset;
+          targetDate = new Date(now.getTime() + diffMinutes * 60000);
+        }
+        const day = String(targetDate.getDate()).padStart(2, '0');
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const month = monthNames[targetDate.getMonth()];
+        const year = targetDate.getFullYear();
+        const hours = String(targetDate.getHours()).padStart(2, '0');
+        const minutes = String(targetDate.getMinutes()).padStart(2, '0');
+        const seconds = String(targetDate.getSeconds()).padStart(2, '0');
+        const dateStr = `${day} ${month} ${year}`;
+        const timeStr = `${hours}:${minutes}:${seconds}`;
+        const dateEl = document.getElementById('server-date');
+        const clockEl = document.getElementById('server-clock');
+        const mobileDateEl = document.getElementById('mobile-server-date');
+        const mobileClockEl = document.getElementById('mobile-server-clock');
+        if (dateEl) dateEl.textContent = dateStr;
+        if (clockEl) clockEl.textContent = timeStr;
+        if (mobileDateEl) mobileDateEl.textContent = dateStr;
+        if (mobileClockEl) mobileClockEl.textContent = timeStr;
+      } catch (err) {
+        console.error('Error updating clock:', err);
       }
-      const day = String(targetDate.getDate()).padStart(2, '0');
-      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      const month = monthNames[targetDate.getMonth()];
-      const year = targetDate.getFullYear();
-      const hours = String(targetDate.getHours()).padStart(2, '0');
-      const minutes = String(targetDate.getMinutes()).padStart(2, '0');
-      const seconds = String(targetDate.getSeconds()).padStart(2, '0');
-      const dateStr = `${day} ${month} ${year}`;
-      const timeStr = `${hours}:${minutes}:${seconds}`;
-      const dateEl = document.getElementById('server-date');
-      const clockEl = document.getElementById('server-clock');
-      const mobileDateEl = document.getElementById('mobile-server-date');
-      const mobileClockEl = document.getElementById('mobile-server-clock');
-      if (dateEl) dateEl.textContent = dateStr;
-      if (clockEl) clockEl.textContent = timeStr;
-      if (mobileDateEl) mobileDateEl.textContent = dateStr;
-      if (mobileClockEl) mobileClockEl.textContent = timeStr;
-    } catch (err) {
-      console.error('Error updating clock:', err);
     }
-  }
 
-  // Start clock ticking immediately so it never shows placeholder
-  updateServerTimeDisplay();
-  if (serverTimeInterval) clearInterval(serverTimeInterval);
-  serverTimeInterval = setInterval(updateServerTimeDisplay, 1000);
+    // Start clock ticking immediately
+    updateServerTimeDisplay();
+    if (serverTimeInterval) clearInterval(serverTimeInterval);
+    serverTimeInterval = setInterval(updateServerTimeDisplay, 1000);
 
-  async function initServerTime() {
-    try {
-      const response = await fetch('/api/server-time');
-      if (!response.ok) return;
-      const data = await response.json();
-      if (data && data.serverTime) {
-        const serverTime = new Date(data.serverTime);
-        const clientTime = new Date();
-        const diff = serverTime.getTime() - clientTime.getTime();
-        if (!isNaN(diff)) serverTimeOffset = diff;
+    async function fetchServerTime() {
+      try {
+        const response = await fetch('/api/server-time');
+        if (!response.ok) return;
+        const data = await response.json();
+        if (data && data.serverTime) {
+          const serverTime = new Date(data.serverTime);
+          const clientTime = new Date();
+          const diff = serverTime.getTime() - clientTime.getTime();
+          if (!isNaN(diff)) serverTimeOffset = diff;
+        }
+        if (data && data.timezoneOffset !== undefined && data.timezoneOffset !== null && !isNaN(data.timezoneOffset)) {
+          serverTimezoneOffset = data.timezoneOffset;
+        }
+        updateServerTimeDisplay();
+      } catch (error) {
+        console.error('Error fetching server time:', error);
       }
-      if (data && data.timezoneOffset !== undefined && data.timezoneOffset !== null && !isNaN(data.timezoneOffset)) {
-        serverTimezoneOffset = data.timezoneOffset;
-      }
-      updateServerTimeDisplay();
-    } catch (error) {
-      console.error('Error fetching server time:', error);
     }
-  }
 
-  async function syncServerTime() {
-    try {
-      const response = await fetch('/api/server-time');
-      if (!response.ok) return;
-      const data = await response.json();
-      if (data && data.serverTime) {
-        const serverTime = new Date(data.serverTime);
-        const clientTime = new Date();
-        const diff = serverTime.getTime() - clientTime.getTime();
-        if (!isNaN(diff)) serverTimeOffset = diff;
-      }
-      if (data && data.timezoneOffset !== undefined && data.timezoneOffset !== null && !isNaN(data.timezoneOffset)) {
-        serverTimezoneOffset = data.timezoneOffset;
-      }
-    } catch (error) {
-    }
-  }
+    fetchServerTime();
+    setInterval(fetchServerTime, 5 * 60 * 1000);
+  })();
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function() {
       loadNotifications();
-      initServerTime();
     });
   } else {
     loadNotifications();
-    initServerTime();
   }
-  setInterval(syncServerTime, 5 * 60 * 1000);
 
   function openStreamflowUpdateModal() {
     const modal = document.getElementById('streamflowUpdateModal');
