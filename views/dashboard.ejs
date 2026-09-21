@@ -413,6 +413,81 @@
                 </div>
               </div>
             </div>
+
+            <!-- Audio Terpisah (Background Music) -->
+            <div class="space-y-4 pt-2 border-t border-gray-700">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                  <i class="ti ti-music text-purple-400 mr-2 text-lg"></i>
+                  <span class="text-sm font-medium text-white">Audio Terpisah (Background Music)</span>
+                  <div class="relative ml-2 group">
+                    <i class="ti ti-info-circle text-gray-400 hover:text-primary"></i>
+                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-72 p-2.5 bg-dark-600 text-xs text-gray-200 rounded-md shadow-lg z-20 pointer-events-none">
+                      <div class="text-center font-normal">
+                        Memutar video dan audio terpisah. Video & audio akan di-looping secara independen (misal: video 3 menit, audio 30 menit) tanpa beban re-encoding video.
+                      </div>
+                      <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-dark-600"></div>
+                    </div>
+                  </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="enableSeparateAudio" class="sr-only peer">
+                  <div class="w-11 h-6 bg-dark-700 rounded-full peer peer-checked:bg-purple-600"></div>
+                  <div class="absolute left-[2px] top-[2px] w-5 h-5 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
+                </label>
+              </div>
+
+              <div id="separateAudioContent" class="hidden space-y-3 bg-dark-900/60 p-3.5 rounded-lg border border-purple-900/40">
+                <!-- Mode Selection -->
+                <div>
+                  <label class="text-xs text-gray-300 block mb-1.5 font-medium">Mode Audio:</label>
+                  <div class="grid grid-cols-3 gap-2">
+                    <button type="button" id="audioModeSingleBtn" onclick="setAudioMode('single')"
+                      class="py-1.5 px-2 text-xs rounded-lg border border-purple-500 bg-purple-600 text-white font-medium flex items-center justify-center gap-1 transition-all">
+                      <i class="ti ti-repeat"></i>
+                      <span>Single Loop</span>
+                    </button>
+                    <button type="button" id="audioModeDailyBtn" onclick="setAudioMode('daily_rotation')"
+                      class="py-1.5 px-2 text-xs rounded-lg border border-gray-700 bg-dark-700 text-gray-300 hover:text-white font-medium flex items-center justify-center gap-1 transition-all">
+                      <i class="ti ti-calendar-repeat"></i>
+                      <span>Rotasi Harian</span>
+                    </button>
+                    <button type="button" id="audioModePlaylistBtn" onclick="setAudioMode('playlist')"
+                      class="py-1.5 px-2 text-xs rounded-lg border border-gray-700 bg-dark-700 text-gray-300 hover:text-white font-medium flex items-center justify-center gap-1 transition-all">
+                      <i class="ti ti-playlist"></i>
+                      <span>Audio Playlist</span>
+                    </button>
+                  </div>
+                  <p id="audioModeDescription" class="text-[11px] text-gray-400 mt-1.5">
+                    Memutar 1 file audio berulang kali selama live stream berlangsung.
+                  </p>
+                </div>
+
+                <!-- Single Audio Selector -->
+                <div id="singleAudioContainer">
+                  <label class="text-xs text-gray-300 block mb-1">Pilih File Audio:</label>
+                  <select id="singleAudioSelect"
+                    class="w-full h-[40px] px-3 bg-dark-700 border border-gray-600 rounded-lg focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-sm text-gray-200">
+                    <option value="">-- Pilih Audio --</option>
+                  </select>
+                </div>
+
+                <!-- Multi Audio Selector (For Daily Rotation & Playlist) -->
+                <div id="multiAudioContainer" class="hidden space-y-2">
+                  <div class="flex items-center justify-between">
+                    <label class="text-xs text-gray-300 font-medium">Pilih Audio (Centang yang ingin diputar/dirotasi):</label>
+                    <span id="selectedAudioCount" class="text-[11px] text-purple-400 font-medium">0 terpilih</span>
+                  </div>
+                  <div id="multiAudioList" class="max-h-40 overflow-y-auto space-y-1 bg-dark-800 p-2 rounded-lg border border-gray-700">
+                    <div class="text-xs text-gray-400 text-center py-2">Memuat audio...</div>
+                  </div>
+                  <p id="dailyRotationNote" class="text-[11px] text-purple-300/80 hidden">
+                    <i class="ti ti-info-circle mr-1"></i> Saat jadwal berulang harian aktif, audio akan otomatis berpindah ke file berikutnya setiap hari.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div class="space-y-4">
               <div class="pt-2 border-t border-gray-700">
                 <button type="button" id="advancedSettingsToggle"
@@ -898,6 +973,81 @@
                 </div>
               </div>
             </div>
+
+            <!-- Audio Terpisah (Background Music) - Edit Modal -->
+            <div class="space-y-4 pt-2 border-t border-gray-700">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                  <i class="ti ti-music text-purple-400 mr-2 text-lg"></i>
+                  <span class="text-sm font-medium text-white">Audio Terpisah (Background Music)</span>
+                  <div class="relative ml-2 group">
+                    <i class="ti ti-info-circle text-gray-400 hover:text-primary"></i>
+                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-72 p-2.5 bg-dark-600 text-xs text-gray-200 rounded-md shadow-lg z-20 pointer-events-none">
+                      <div class="text-center font-normal">
+                        Memutar video dan audio terpisah. Video & audio akan di-looping secara independen tanpa beban re-encoding video.
+                      </div>
+                      <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-dark-600"></div>
+                    </div>
+                  </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="editEnableSeparateAudio" class="sr-only peer">
+                  <div class="w-11 h-6 bg-dark-700 rounded-full peer peer-checked:bg-purple-600"></div>
+                  <div class="absolute left-[2px] top-[2px] w-5 h-5 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
+                </label>
+              </div>
+
+              <div id="editSeparateAudioContent" class="hidden space-y-3 bg-dark-900/60 p-3.5 rounded-lg border border-purple-900/40">
+                <!-- Mode Selection -->
+                <div>
+                  <label class="text-xs text-gray-300 block mb-1.5 font-medium">Mode Audio:</label>
+                  <div class="grid grid-cols-3 gap-2">
+                    <button type="button" id="editAudioModeSingleBtn" onclick="setEditAudioMode('single')"
+                      class="py-1.5 px-2 text-xs rounded-lg border border-purple-500 bg-purple-600 text-white font-medium flex items-center justify-center gap-1 transition-all">
+                      <i class="ti ti-repeat"></i>
+                      <span>Single Loop</span>
+                    </button>
+                    <button type="button" id="editAudioModeDailyBtn" onclick="setEditAudioMode('daily_rotation')"
+                      class="py-1.5 px-2 text-xs rounded-lg border border-gray-700 bg-dark-700 text-gray-300 hover:text-white font-medium flex items-center justify-center gap-1 transition-all">
+                      <i class="ti ti-calendar-repeat"></i>
+                      <span>Rotasi Harian</span>
+                    </button>
+                    <button type="button" id="editAudioModePlaylistBtn" onclick="setEditAudioMode('playlist')"
+                      class="py-1.5 px-2 text-xs rounded-lg border border-gray-700 bg-dark-700 text-gray-300 hover:text-white font-medium flex items-center justify-center gap-1 transition-all">
+                      <i class="ti ti-playlist"></i>
+                      <span>Audio Playlist</span>
+                    </button>
+                  </div>
+                  <p id="editAudioModeDescription" class="text-[11px] text-gray-400 mt-1.5">
+                    Memutar 1 file audio berulang kali selama live stream berlangsung.
+                  </p>
+                </div>
+
+                <!-- Single Audio Selector -->
+                <div id="editSingleAudioContainer">
+                  <label class="text-xs text-gray-300 block mb-1">Pilih File Audio:</label>
+                  <select id="editSingleAudioSelect"
+                    class="w-full h-[40px] px-3 bg-dark-700 border border-gray-600 rounded-lg focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-sm text-gray-200">
+                    <option value="">-- Pilih Audio --</option>
+                  </select>
+                </div>
+
+                <!-- Multi Audio Selector -->
+                <div id="editMultiAudioContainer" class="hidden space-y-2">
+                  <div class="flex items-center justify-between">
+                    <label class="text-xs text-gray-300 font-medium">Pilih Audio (Centang yang ingin diputar/dirotasi):</label>
+                    <span id="editSelectedAudioCount" class="text-[11px] text-purple-400 font-medium">0 terpilih</span>
+                  </div>
+                  <div id="editMultiAudioList" class="max-h-40 overflow-y-auto space-y-1 bg-dark-800 p-2 rounded-lg border border-gray-700">
+                    <div class="text-xs text-gray-400 text-center py-2">Memuat audio...</div>
+                  </div>
+                  <p id="editDailyRotationNote" class="text-[11px] text-purple-300/80 hidden">
+                    <i class="ti ti-info-circle mr-1"></i> Saat jadwal berulang harian aktif, audio akan otomatis berpindah ke file berikutnya setiap hari.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div class="space-y-4">
               <div class="pt-2 border-t border-gray-700">
                 <button type="button" id="editAdvancedSettingsToggle"
@@ -1310,6 +1460,208 @@
       return new Date(Date.now() + serverTimeSkewMs);
     }
 
+    // --- Audio Terpisah (Background Music) Management ---
+    let currentAudioMode = 'single';
+    let currentEditAudioMode = 'single';
+    let cachedAudios = null;
+
+    async function loadAudioOptions(force = false, callback = null) {
+      if (cachedAudios && !force) {
+        populateAudioSelects(cachedAudios);
+        if (callback) callback(cachedAudios);
+        return;
+      }
+      try {
+        const res = await fetch('/api/stream/audios');
+        const data = await res.json();
+        if (data.success && data.audios) {
+          cachedAudios = data.audios;
+          populateAudioSelects(cachedAudios);
+          if (callback) callback(cachedAudios);
+        }
+      } catch (err) {
+        console.error('Error loading audios:', err);
+      }
+    }
+
+    function populateAudioSelects(audios) {
+      const singleSelect = document.getElementById('singleAudioSelect');
+      if (singleSelect) {
+        const prevVal = singleSelect.value;
+        singleSelect.innerHTML = '<option value="">-- Pilih Audio --</option>';
+        audios.forEach(a => {
+          const opt = document.createElement('option');
+          opt.value = a.id;
+          opt.textContent = `${a.name} (${a.duration})`;
+          singleSelect.appendChild(opt);
+        });
+        if (prevVal) singleSelect.value = prevVal;
+      }
+
+      const multiList = document.getElementById('multiAudioList');
+      if (multiList) {
+        if (audios.length === 0) {
+          multiList.innerHTML = '<div class="text-xs text-gray-400 text-center py-2">Belum ada file audio. Silakan upload audio di halaman Media.</div>';
+        } else {
+          multiList.innerHTML = '';
+          audios.forEach(a => {
+            const item = document.createElement('label');
+            item.className = 'flex items-center gap-2 p-1.5 rounded hover:bg-dark-700 cursor-pointer text-xs text-gray-200 transition-colors';
+            item.innerHTML = `
+              <input type="checkbox" value="${a.id}" class="rounded border-gray-600 text-purple-600 focus:ring-purple-500 bg-dark-900 h-3.5 w-3.5" onchange="updateSelectedAudioCount()">
+              <i class="ti ti-music text-purple-400 text-sm"></i>
+              <span class="truncate flex-1 font-medium">${escapeHtml(a.name)}</span>
+              <span class="text-gray-400 text-[11px]">${a.duration}</span>
+            `;
+            multiList.appendChild(item);
+          });
+        }
+      }
+
+      const editSingleSelect = document.getElementById('editSingleAudioSelect');
+      if (editSingleSelect) {
+        const prevVal = editSingleSelect.value;
+        editSingleSelect.innerHTML = '<option value="">-- Pilih Audio --</option>';
+        audios.forEach(a => {
+          const opt = document.createElement('option');
+          opt.value = a.id;
+          opt.textContent = `${a.name} (${a.duration})`;
+          editSingleSelect.appendChild(opt);
+        });
+        if (prevVal) editSingleSelect.value = prevVal;
+      }
+
+      const editMultiList = document.getElementById('editMultiAudioList');
+      if (editMultiList) {
+        if (audios.length === 0) {
+          editMultiList.innerHTML = '<div class="text-xs text-gray-400 text-center py-2">Belum ada file audio. Silakan upload audio di halaman Media.</div>';
+        } else {
+          editMultiList.innerHTML = '';
+          audios.forEach(a => {
+            const item = document.createElement('label');
+            item.className = 'flex items-center gap-2 p-1.5 rounded hover:bg-dark-700 cursor-pointer text-xs text-gray-200 transition-colors';
+            item.innerHTML = `
+              <input type="checkbox" value="${a.id}" class="rounded border-gray-600 text-purple-600 focus:ring-purple-500 bg-dark-900 h-3.5 w-3.5" onchange="updateEditSelectedAudioCount()">
+              <i class="ti ti-music text-purple-400 text-sm"></i>
+              <span class="truncate flex-1 font-medium">${escapeHtml(a.name)}</span>
+              <span class="text-gray-400 text-[11px]">${a.duration}</span>
+            `;
+            editMultiList.appendChild(item);
+          });
+        }
+      }
+    }
+
+    function updateSelectedAudioCount() {
+      const count = document.querySelectorAll('#multiAudioList input[type="checkbox"]:checked').length;
+      const el = document.getElementById('selectedAudioCount');
+      if (el) el.textContent = `${count} terpilih`;
+    }
+
+    function updateEditSelectedAudioCount() {
+      const count = document.querySelectorAll('#editMultiAudioList input[type="checkbox"]:checked').length;
+      const el = document.getElementById('editSelectedAudioCount');
+      if (el) el.textContent = `${count} terpilih`;
+    }
+
+    function setAudioMode(mode) {
+      currentAudioMode = mode;
+      const singleBtn = document.getElementById('audioModeSingleBtn');
+      const dailyBtn = document.getElementById('audioModeDailyBtn');
+      const playlistBtn = document.getElementById('audioModePlaylistBtn');
+      const desc = document.getElementById('audioModeDescription');
+      const singleCont = document.getElementById('singleAudioContainer');
+      const multiCont = document.getElementById('multiAudioContainer');
+      const dailyNote = document.getElementById('dailyRotationNote');
+
+      const activeClasses = ['border-purple-500', 'bg-purple-600', 'text-white'];
+      const inactiveClasses = ['border-gray-700', 'bg-dark-700', 'text-gray-300', 'hover:text-white'];
+
+      [singleBtn, dailyBtn, playlistBtn].forEach(b => {
+        if (b) {
+          activeClasses.forEach(c => b.classList.remove(c));
+          inactiveClasses.forEach(c => b.classList.add(c));
+        }
+      });
+
+      if (mode === 'single') {
+        if (singleBtn) {
+          inactiveClasses.forEach(c => singleBtn.classList.remove(c));
+          activeClasses.forEach(c => singleBtn.classList.add(c));
+        }
+        if (desc) desc.textContent = 'Memutar 1 file audio berulang kali selama live stream berlangsung.';
+        if (singleCont) singleCont.classList.remove('hidden');
+        if (multiCont) multiCont.classList.add('hidden');
+      } else if (mode === 'daily_rotation') {
+        if (dailyBtn) {
+          inactiveClasses.forEach(c => dailyBtn.classList.remove(c));
+          activeClasses.forEach(c => dailyBtn.classList.add(c));
+        }
+        if (desc) desc.textContent = 'Pilih beberapa audio. Audio akan dirotasi otomatis ke audio berikutnya setiap hari saat jadwal berulang aktif.';
+        if (singleCont) singleCont.classList.add('hidden');
+        if (multiCont) multiCont.classList.remove('hidden');
+        if (dailyNote) dailyNote.classList.remove('hidden');
+      } else if (mode === 'playlist') {
+        if (playlistBtn) {
+          inactiveClasses.forEach(c => playlistBtn.classList.remove(c));
+          activeClasses.forEach(c => playlistBtn.classList.add(c));
+        }
+        if (desc) desc.textContent = 'Putar berurutan beberapa audio yang dipilih sebagai playlist lagu latar.';
+        if (singleCont) singleCont.classList.add('hidden');
+        if (multiCont) multiCont.classList.remove('hidden');
+        if (dailyNote) dailyNote.classList.add('hidden');
+      }
+    }
+
+    function setEditAudioMode(mode) {
+      currentEditAudioMode = mode;
+      const singleBtn = document.getElementById('editAudioModeSingleBtn');
+      const dailyBtn = document.getElementById('editAudioModeDailyBtn');
+      const playlistBtn = document.getElementById('editAudioModePlaylistBtn');
+      const desc = document.getElementById('editAudioModeDescription');
+      const singleCont = document.getElementById('editSingleAudioContainer');
+      const multiCont = document.getElementById('editMultiAudioContainer');
+      const dailyNote = document.getElementById('editDailyRotationNote');
+
+      const activeClasses = ['border-purple-500', 'bg-purple-600', 'text-white'];
+      const inactiveClasses = ['border-gray-700', 'bg-dark-700', 'text-gray-300', 'hover:text-white'];
+
+      [singleBtn, dailyBtn, playlistBtn].forEach(b => {
+        if (b) {
+          activeClasses.forEach(c => b.classList.remove(c));
+          inactiveClasses.forEach(c => b.classList.add(c));
+        }
+      });
+
+      if (mode === 'single') {
+        if (singleBtn) {
+          inactiveClasses.forEach(c => singleBtn.classList.remove(c));
+          activeClasses.forEach(c => singleBtn.classList.add(c));
+        }
+        if (desc) desc.textContent = 'Memutar 1 file audio berulang kali selama live stream berlangsung.';
+        if (singleCont) singleCont.classList.remove('hidden');
+        if (multiCont) multiCont.classList.add('hidden');
+      } else if (mode === 'daily_rotation') {
+        if (dailyBtn) {
+          inactiveClasses.forEach(c => dailyBtn.classList.remove(c));
+          activeClasses.forEach(c => dailyBtn.classList.add(c));
+        }
+        if (desc) desc.textContent = 'Pilih beberapa audio. Audio akan dirotasi otomatis ke audio berikutnya setiap hari saat jadwal berulang aktif.';
+        if (singleCont) singleCont.classList.add('hidden');
+        if (multiCont) multiCont.classList.remove('hidden');
+        if (dailyNote) dailyNote.classList.remove('hidden');
+      } else if (mode === 'playlist') {
+        if (playlistBtn) {
+          inactiveClasses.forEach(c => playlistBtn.classList.remove(c));
+          activeClasses.forEach(c => playlistBtn.classList.add(c));
+        }
+        if (desc) desc.textContent = 'Putar berurutan beberapa audio yang dipilih sebagai playlist lagu latar.';
+        if (singleCont) singleCont.classList.add('hidden');
+        if (multiCont) multiCont.classList.remove('hidden');
+        if (dailyNote) dailyNote.classList.add('hidden');
+      }
+    }
+
     function showToast(type, message) {
       const toast = document.getElementById('toast');
       const toastIcon = document.getElementById('toast-icon');
@@ -1671,6 +2023,20 @@
           if (scheduleStart) ytFormData.scheduleStartTime = scheduleStart;
           if (scheduleEnd) ytFormData.scheduleEndTime = scheduleEnd;
         }
+
+        if (document.getElementById('enableSeparateAudio')?.checked) {
+          ytFormData.audioMode = currentAudioMode;
+          if (currentAudioMode === 'single') {
+            ytFormData.audioId = document.getElementById('singleAudioSelect')?.value || null;
+          } else {
+            const checkedAudioBoxes = Array.from(document.querySelectorAll('#multiAudioList input[type="checkbox"]:checked'));
+            const selectedAudioIds = checkedAudioBoxes.map(cb => cb.value);
+            ytFormData.audioIds = selectedAudioIds;
+            ytFormData.audioId = selectedAudioIds[0] || null;
+          }
+        } else {
+          ytFormData.audioMode = 'none';
+        }
         
         const createBtn = document.querySelector('#newStreamModal button[type="submit"]');
         const originalBtnText = createBtn.innerHTML;
@@ -1782,6 +2148,29 @@
         formData.scheduleStartTime = scheduleStartTime;
       }
       formData.isDaily = document.getElementById('isDaily')?.checked || false;
+
+      if (document.getElementById('enableSeparateAudio')?.checked) {
+        formData.audioMode = currentAudioMode;
+        if (currentAudioMode === 'single') {
+          const singleAudioVal = document.getElementById('singleAudioSelect')?.value;
+          if (!singleAudioVal) {
+            showToast('error', 'Silakan pilih file audio terlebih dahulu');
+            return;
+          }
+          formData.audioId = singleAudioVal;
+        } else {
+          const checkedAudioBoxes = Array.from(document.querySelectorAll('#multiAudioList input[type="checkbox"]:checked'));
+          if (checkedAudioBoxes.length === 0) {
+            showToast('error', 'Silakan pilih minimal 1 file audio');
+            return;
+          }
+          const selectedAudioIds = checkedAudioBoxes.map(cb => cb.value);
+          formData.audioIds = selectedAudioIds;
+          formData.audioId = selectedAudioIds[0];
+        }
+      } else {
+        formData.audioMode = 'none';
+      }
 
       const durationHours = document.getElementById('durationHours')?.value;
       const durationMinutes = document.getElementById('durationMinutes')?.value;
@@ -2141,6 +2530,13 @@
               <span class="text-gray-600 text-[10px]">•</span>
               <span class="text-[10px] text-gray-400 stream-settings-display">${settingsDisplay}</span>
             </div>
+            ${stream.audio_mode && stream.audio_mode !== 'none' ? `
+            <div class="mt-1">
+              <span class="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-purple-900/60 text-purple-300 border border-purple-700/50">
+                <i class="ti ti-music text-[10px]"></i>
+                <span class="truncate max-w-[150px]">${stream.audio_mode === 'daily_rotation' ? 'Rotasi Harian' : (stream.audio_mode === 'playlist' ? 'Audio Playlist' : 'Audio Terpisah')}${stream.audio_title ? ': ' + escapeHtml(stream.audio_title) : ''}</span>
+              </span>
+            </div>` : ''}
             <div class="inline-flex items-center gap-1.5 bg-dark-900/90 px-2 py-0.5 rounded border border-gray-700/80 text-[11px] font-mono text-gray-300 mt-1">
               <i class="ti ti-key text-amber-400 text-[10px] flex-shrink-0"></i>
               <span class="stream-key-text select-all truncate max-w-[130px]" data-full-key="${escapeHtml(stream.stream_key || '')}" data-revealed="false">
@@ -2243,6 +2639,13 @@
               <span class="truncate">${displayChannel}</span>
             </div>` : ''}
             <div class="text-[11px] text-gray-400 stream-settings-display mt-0.5">${settingsDisplay}</div>
+            ${stream.audio_mode && stream.audio_mode !== 'none' ? `
+            <div class="mt-1">
+              <span class="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-purple-900/60 text-purple-300 border border-purple-700/50" title="Audio: ${escapeHtml(stream.audio_title || stream.audio_mode)}">
+                <i class="ti ti-music text-[10px]"></i>
+                <span class="truncate max-w-[200px]">${stream.audio_mode === 'daily_rotation' ? 'Rotasi Harian' : (stream.audio_mode === 'playlist' ? 'Audio Playlist' : 'Audio Terpisah')}${stream.audio_title ? ': ' + escapeHtml(stream.audio_title) : ''}</span>
+              </span>
+            </div>` : ''}
           </div>
         </div>
       </td>
@@ -3601,6 +4004,35 @@
         advancedSettingsContent.classList.add('hidden');
         advancedSettingsCheckbox.checked = false;
       }
+
+      const editEnableSepAudio = document.getElementById('editEnableSeparateAudio');
+      const editSepAudioContent = document.getElementById('editSeparateAudioContent');
+      if (stream.audio_mode && stream.audio_mode !== 'none') {
+        if (editEnableSepAudio) editEnableSepAudio.checked = true;
+        if (editSepAudioContent) editSepAudioContent.classList.remove('hidden');
+        setEditAudioMode(stream.audio_mode);
+        loadAudioOptions(false, () => {
+          if (stream.audio_mode === 'single') {
+            const selectEl = document.getElementById('editSingleAudioSelect');
+            if (selectEl) selectEl.value = stream.audio_id || '';
+          } else {
+            let ids = [];
+            try {
+              ids = typeof stream.audio_ids === 'string' ? JSON.parse(stream.audio_ids) : (stream.audio_ids || []);
+            } catch (e) { ids = []; }
+            const checkboxes = document.querySelectorAll('#editMultiAudioList input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+              cb.checked = Array.isArray(ids) && ids.includes(cb.value);
+            });
+            updateEditSelectedAudioCount();
+          }
+        });
+      } else {
+        if (editEnableSepAudio) editEnableSepAudio.checked = false;
+        if (editSepAudioContent) editSepAudioContent.classList.add('hidden');
+        setEditAudioMode('single');
+      }
+
       const modal = document.getElementById('editStreamModal');
       document.body.style.overflow = 'hidden';
       modal.classList.remove('hidden');
@@ -3628,6 +4060,11 @@
       
       const editDurationBadge = document.getElementById('editDurationBadge');
       if (editDurationBadge) editDurationBadge.classList.add('hidden');
+
+      const editEnableSepAudio = document.getElementById('editEnableSeparateAudio');
+      if (editEnableSepAudio) editEnableSepAudio.checked = false;
+      const editSepAudioContent = document.getElementById('editSeparateAudioContent');
+      if (editSepAudioContent) editSepAudioContent.classList.add('hidden');
       
       const editDesktopVideo = document.getElementById('edit-native-preview-desktop');
       const editMobileVideo = document.getElementById('edit-native-preview-mobile');
@@ -3938,6 +4375,22 @@
               ytFormDataObj.scheduleStartTime = '';
               ytFormDataObj.scheduleEndTime = '';
             }
+
+            if (document.getElementById('editEnableSeparateAudio')?.checked) {
+              ytFormDataObj.audioMode = currentEditAudioMode;
+              if (currentEditAudioMode === 'single') {
+                ytFormDataObj.audioId = document.getElementById('editSingleAudioSelect')?.value || null;
+              } else {
+                const checkedAudioBoxes = Array.from(document.querySelectorAll('#editMultiAudioList input[type="checkbox"]:checked'));
+                const selectedAudioIds = checkedAudioBoxes.map(cb => cb.value);
+                ytFormDataObj.audioIds = selectedAudioIds;
+                ytFormDataObj.audioId = selectedAudioIds[0] || null;
+              }
+            } else {
+              ytFormDataObj.audioMode = 'none';
+              ytFormDataObj.audioId = null;
+              ytFormDataObj.audioIds = null;
+            }
             
             const saveBtn = document.querySelector('#editStreamModal button[type="submit"]');
             const originalSaveBtnText = saveBtn.innerHTML;
@@ -4031,6 +4484,31 @@
           formData.scheduleStartTime = scheduleStartTime || '';
           formData.isDaily = document.getElementById('editIsDaily')?.checked || false;
 
+          if (document.getElementById('editEnableSeparateAudio')?.checked) {
+            formData.audioMode = currentEditAudioMode;
+            if (currentEditAudioMode === 'single') {
+              const singleAudioVal = document.getElementById('editSingleAudioSelect')?.value;
+              if (!singleAudioVal) {
+                showToast('error', 'Silakan pilih file audio terlebih dahulu');
+                return;
+              }
+              formData.audioId = singleAudioVal;
+            } else {
+              const checkedAudioBoxes = Array.from(document.querySelectorAll('#editMultiAudioList input[type="checkbox"]:checked'));
+              if (checkedAudioBoxes.length === 0) {
+                showToast('error', 'Silakan pilih minimal 1 file audio');
+                return;
+              }
+              const selectedAudioIds = checkedAudioBoxes.map(cb => cb.value);
+              formData.audioIds = selectedAudioIds;
+              formData.audioId = selectedAudioIds[0];
+            }
+          } else {
+            formData.audioMode = 'none';
+            formData.audioId = null;
+            formData.audioIds = null;
+          }
+
           const durationHours = document.getElementById('editDurationHours')?.value;
           const durationMinutes = document.getElementById('editDurationMinutes')?.value;
           const durationSeconds = document.getElementById('editDurationSeconds')?.value;
@@ -4087,6 +4565,32 @@
     document.addEventListener('DOMContentLoaded', function () {
       setupAdvancedSettings('advancedSettingsToggle', 'advancedSettingsContent', 'advancedSettingsCheckbox');
       setupAdvancedSettings('editAdvancedSettingsToggle', 'editAdvancedSettingsContent', 'editAdvancedSettingsCheckbox');
+
+      const enableSepAudio = document.getElementById('enableSeparateAudio');
+      const sepAudioContent = document.getElementById('separateAudioContent');
+      if (enableSepAudio && sepAudioContent) {
+        enableSepAudio.addEventListener('change', function () {
+          if (this.checked) {
+            sepAudioContent.classList.remove('hidden');
+            loadAudioOptions();
+          } else {
+            sepAudioContent.classList.add('hidden');
+          }
+        });
+      }
+
+      const editEnableSepAudio = document.getElementById('editEnableSeparateAudio');
+      const editSepAudioContent = document.getElementById('editSeparateAudioContent');
+      if (editEnableSepAudio && editSepAudioContent) {
+        editEnableSepAudio.addEventListener('change', function () {
+          if (this.checked) {
+            editSepAudioContent.classList.remove('hidden');
+            loadAudioOptions();
+          } else {
+            editSepAudioContent.classList.add('hidden');
+          }
+        });
+      }
     });
     function setupAdvancedSettings(toggleId, contentId, checkboxId) {
       const toggle = document.getElementById(toggleId);

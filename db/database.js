@@ -66,6 +66,10 @@ function createTables() {
         start_time TIMESTAMP,
         end_time TIMESTAMP,
         use_advanced_settings BOOLEAN DEFAULT 0,
+        audio_mode TEXT DEFAULT 'none',
+        audio_id TEXT,
+        audio_ids TEXT,
+        current_audio_index INTEGER DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         user_id TEXT,
@@ -225,6 +229,30 @@ function createTables() {
       db.run(`ALTER TABLE streams ADD COLUMN youtube_thumbnail TEXT`, (err) => {
         if (err && !err.message.includes('duplicate column name')) {
           console.error('Error adding youtube_thumbnail column:', err.message);
+        }
+      });
+
+      db.run(`ALTER TABLE streams ADD COLUMN audio_mode TEXT DEFAULT 'none'`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+          console.error('Error adding audio_mode column:', err.message);
+        }
+      });
+
+      db.run(`ALTER TABLE streams ADD COLUMN audio_id TEXT`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+          console.error('Error adding audio_id column:', err.message);
+        }
+      });
+
+      db.run(`ALTER TABLE streams ADD COLUMN audio_ids TEXT`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+          console.error('Error adding audio_ids column:', err.message);
+        }
+      });
+
+      db.run(`ALTER TABLE streams ADD COLUMN current_audio_index INTEGER DEFAULT 0`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+          console.error('Error adding current_audio_index column:', err.message);
         }
       });
 

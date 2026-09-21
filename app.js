@@ -3022,6 +3022,33 @@ app.get('/api/stream/content', isAuthenticated, async (req, res) => {
   }
 });
 
+app.get('/api/stream/audios', isAuthenticated, async (req, res) => {
+  try {
+    const allVideos = await Video.findAll(req.session.userId);
+    const audios = allVideos.filter(video => {
+      const filepath = (video.filepath || '').toLowerCase();
+      return filepath.includes('/audio/') || filepath.endsWith('.m4a') || filepath.endsWith('.aac') || filepath.endsWith('.mp3');
+    });
+    const formattedAudios = audios.map(audio => {
+      const duration = audio.duration ? Math.floor(audio.duration) : 0;
+      const minutes = Math.floor(duration / 60);
+      const seconds = Math.floor(duration % 60);
+      const formattedDuration = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+      return {
+        id: audio.id,
+        name: audio.title,
+        duration: formattedDuration,
+        durationSeconds: audio.duration || 0,
+        filepath: audio.filepath
+      };
+    });
+    res.json({ success: true, audios: formattedAudios });
+  } catch (error) {
+    console.error('Error fetching stream audios:', error);
+    res.status(500).json({ success: false, error: 'Failed to load audios' });
+  }
+});
+
 app.get('/api/streams', isAuthenticated, async (req, res) => {
   try {
     const filter = req.query.filter;
@@ -3107,6 +3134,10 @@ app.post('/api/streams', isAuthenticated, [
     }
     
     streamData.is_daily = req.body.isDaily === 'true' || req.body.isDaily === true;
+    streamData.audio_mode = req.body.audioMode || 'none';
+    streamData.audio_id = req.body.audioId || null;
+    streamData.audio_ids = req.body.audioIds ? (typeof req.body.audioIds === 'string' ? req.body.audioIds : JSON.stringify(req.body.audioIds)) : null;
+    streamData.current_audio_index = parseInt(req.body.currentAudioIndex) || 0;
     
     if (req.body.scheduleStartTime) {
       const scheduleStartDate = parseLocalDateTime(req.body.scheduleStartTime);
@@ -3242,7 +3273,11 @@ app.post('/api/streams/youtube', isAuthenticated, uploadThumbnail.single('thumbn
       youtube_tags: tags || '',
       youtube_thumbnail: localThumbnailPath,
       youtube_channel_id: selectedChannel.id,
-      is_youtube_api: true
+      is_youtube_api: true,
+      audio_mode: req.body.audioMode || 'none',
+      audio_id: req.body.audioId || null,
+      audio_ids: req.body.audioIds ? (typeof req.body.audioIds === 'string' ? req.body.audioIds : JSON.stringify(req.body.audioIds)) : null,
+      current_audio_index: parseInt(req.body.currentAudioIndex) || 0
     };
     
     if (scheduleStartTime) {
@@ -3341,6 +3376,18 @@ app.put('/api/streams/:id', isAuthenticated, uploadThumbnail.single('thumbnail')
       return res.status(403).json({ success: false, error: 'Not authorized to update this stream' });
     }
     const updateData = {};
+    if (req.body.audioMode !== undefined) {
+      updateData.audio_mode = req.body.audioMode;
+    }
+    if (req.body.audioId !== undefined) {
+      updateData.audio_id = req.body.audioId || null;
+    }
+    if (req.body.audioIds !== undefined) {
+      updateData.audio_ids = req.body.audioIds ? (typeof req.body.audioIds === 'string' ? req.body.audioIds : JSON.stringify(req.body.audioIds)) : null;
+    }
+    if (req.body.currentAudioIndex !== undefined) {
+      updateData.current_audio_index = parseInt(req.body.currentAudioIndex) || 0;
+    }
     
     function parseScheduleDateTime(dateTimeString) {
       const [datePart, timePart] = dateTimeString.split('T');
@@ -3563,6 +3610,18 @@ app.put('/api/streams/:id', isAuthenticated, uploadThumbnail.single('thumbnail')
     
     if (req.body.isDaily !== undefined) {
       updateData.is_daily = req.body.isDaily === 'true' || req.body.isDaily === true;
+    }
+    if (req.body.audioMode !== undefined) {
+      updateData.audio_mode = req.body.audioMode;
+    }
+    if (req.body.audioId !== undefined) {
+      updateData.audio_id = req.body.audioId || null;
+    }
+    if (req.body.audioIds !== undefined) {
+      updateData.audio_ids = req.body.audioIds ? (typeof req.body.audioIds === 'string' ? req.body.audioIds : JSON.stringify(req.body.audioIds)) : null;
+    }
+    if (req.body.currentAudioIndex !== undefined) {
+      updateData.current_audio_index = parseInt(req.body.currentAudioIndex) || 0;
     }
 
     if (req.body.scheduleStartTime) {

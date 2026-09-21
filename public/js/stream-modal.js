@@ -20,6 +20,7 @@ function openNewStreamModal() {
   }
   requestAnimationFrame(() => { modal.classList.add('active'); });
   loadGalleryVideos();
+  if (typeof loadAudioOptions === 'function') loadAudioOptions();
 }
 
 function closeNewStreamModal() {
@@ -51,6 +52,16 @@ function closeNewStreamModal() {
   if (ytEnableSchedule) ytEnableSchedule.checked = false;
   if (ytScheduleSettings) ytScheduleSettings.classList.add('hidden');
   if (typeof setStreamMode === 'function') setStreamMode('manual');
+  const enableSepAudio = document.getElementById('enableSeparateAudio');
+  if (enableSepAudio) enableSepAudio.checked = false;
+  const sepAudioContent = document.getElementById('separateAudioContent');
+  if (sepAudioContent) sepAudioContent.classList.add('hidden');
+  if (typeof setAudioMode === 'function') setAudioMode('single');
+  const singleAudioSelect = document.getElementById('singleAudioSelect');
+  if (singleAudioSelect) singleAudioSelect.value = '';
+  const multiAudioCheckboxes = document.querySelectorAll('#multiAudioList input[type="checkbox"]');
+  multiAudioCheckboxes.forEach(cb => cb.checked = false);
+  if (typeof updateSelectedAudioCount === 'function') updateSelectedAudioCount();
   const desktopVideo = document.getElementById('native-preview-desktop');
   const mobileVideo = document.getElementById('native-preview-mobile');
   if (desktopVideo) { desktopVideo.pause(); desktopVideo.src = ''; }

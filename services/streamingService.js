@@ -289,6 +289,142 @@ async function buildFFmpegArgs(stream) {
   const rtmpUrl = `${stream.rtmp_url.replace(/\/$/, '')}/${stream.stream_key}`;
   const loopValue = stream.loop_video ? '-1' : '0';
 
+  const hasSeparateAudio = stream.audio_mode && stream.audio_mode !== 'none';
+  if (hasSeparateAudio) {
+    let audioPath = null;
+    let audioConcatFile = null;
+
+    if (stream.audio_mode === 'single' || stream.audio_mode === 'daily_rotation') {
+      let targetAudioId = stream.audio_id;
+      if (stream.audio_mode === 'daily_rotation' && stream.audio_ids) {
+        try {
+          const ids = typeof stream.audio_ids === 'string' ? JSON.parse(stream.audio_ids) : stream.audio_ids;
+          if (Array.isArray(ids) && ids.length > 0) {
+            const idx = (stream.current_audio_index || 0) % ids.length;
+            targetAudioId = ids[idx];
+          }
+        } catch (e) {
+          console.error('Error parsing audio_ids for daily rotation:', e);
+        }
+      }
+
+      if (targetAudioId) {
+        const audioVideo = await Video.findById(targetAudioId);
+        if (audioVideo) {
+          const audioRelPath = audioVideo.filepath.startsWith('/') ? audioVideo.filepath.substring(1) : audioVideo.filepath;
+          const fullAudioPath = path.join(projectRoot, 'public', audioRelPath);
+          if (fs.existsSync(fullAudioPath)) {
+            audioPath = fullAudioPath;
+          } else {
+            console.warn(`[Stream ${stream.id}] Audio file not found at ${fullAudioPath}, falling back`);
+          }
+        }
+      }
+    } else if (stream.audio_mode === 'playlist' && stream.audio_ids) {
+      try {
+        const ids = typeof stream.audio_ids === 'string' ? JSON.parse(stream.audio_ids) : stream.audio_ids;
+        if (Array.isArray(ids) && ids.length > 0) {
+          const audioPaths = [];
+          for (const aId of ids) {
+            const aVid = await Video.findById(aId);
+            if (aVid) {
+              const aRel = aVid.filepath.startsWith('/') ? aVid.filepath.substring(1) : aVid.filepath;
+              const aFull = path.join(projectRoot, 'public', aRel);
+              if (fs.existsSync(aFull)) {
+                audioPaths.push(aFull);
+              }
+            }
+          }
+          if (audioPaths.length > 0) {
+            const tempDir = path.join(projectRoot, 'temp');
+            if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
+            audioConcatFile = path.join(tempDir, `stream_bgm_${stream.id}.txt`);
+            let concatContent = '';
+            for (let i = 0; i < 10000; i++) {
+              for (const ap of audioPaths) {
+                concatContent += `file '${ap.replace(/\\/g, '/')}'\n`;
+              }
+            }
+            fs.writeFileSync(audioConcatFile, concatContent);
+          }
+        }
+      } catch (e) {
+        console.error('Error preparing audio playlist for stream:', e);
+      }
+    }
+
+    if (audioPath || audioConcatFile) {
+      const audioInputArgs = audioPath
+        ? ['-stream_loop', '-1', '-i', audioPath]
+        : ['-f', 'concat', '-safe', '0', '-i', audioConcatFile];
+
+      if (!stream.use_advanced_settings) {
+        return [
+          '-nostdin',
+          '-loglevel', 'warning',
+          '-stats',
+          '-re',
+          '-fflags', '+genpts+igndts+discardcorrupt',
+          '-avoid_negative_ts', 'make_zero',
+          '-stream_loop', loopValue,
+          '-i', videoPath,
+          ...audioInputArgs,
+          '-map', '0:v:0',
+          '-map', '1:a:0',
+          '-c:v', 'copy',
+          '-c:a', 'aac',
+          '-b:a', '192k',
+          '-ar', '44100',
+          '-ac', '2',
+          '-f', 'flv',
+          '-flvflags', 'no_duration_filesize',
+          '-rw_timeout', '10000000',
+          rtmpUrl
+        ];
+      } else {
+        const resolution = stream.resolution || '1280x720';
+        const bitrate = stream.bitrate || 2500;
+        const fps = stream.fps || 30;
+
+        return [
+          '-nostdin',
+          '-loglevel', 'warning',
+          '-stats',
+          '-re',
+          '-fflags', '+genpts+igndts+discardcorrupt',
+          '-avoid_negative_ts', 'make_zero',
+          '-stream_loop', loopValue,
+          '-i', videoPath,
+          ...audioInputArgs,
+          '-map', '0:v:0',
+          '-map', '1:a:0',
+          '-c:v', 'libx264',
+          '-preset', 'veryfast',
+          '-tune', 'zerolatency',
+          '-profile:v', 'high',
+          '-level', '4.1',
+          '-b:v', `${bitrate}k`,
+          '-maxrate', `${Math.round(bitrate * 1.1)}k`,
+          '-bufsize', `${bitrate * 2}k`,
+          '-pix_fmt', 'yuv420p',
+          '-g', String(fps * 2),
+          '-keyint_min', String(fps),
+          '-sc_threshold', '0',
+          '-s', resolution,
+          '-r', String(fps),
+          '-c:a', 'aac',
+          '-b:a', '128k',
+          '-ar', '44100',
+          '-ac', '2',
+          '-f', 'flv',
+          '-flvflags', 'no_duration_filesize',
+          '-rw_timeout', '10000000',
+          rtmpUrl
+        ];
+      }
+    }
+  }
+
   if (!stream.use_advanced_settings) {
     return [
       '-nostdin',
@@ -521,11 +657,24 @@ async function startStream(streamId, isRetry = false, baseUrl = null) {
               if (currentStream.is_daily && baseStartTime) {
                 const nextScheduleTime = new Date(new Date(baseStartTime).getTime() + 24 * 60 * 60 * 1000).toISOString();
                 const nextEndTime = new Date(new Date(currentStream.end_time).getTime() + 24 * 60 * 60 * 1000).toISOString();
-                await Stream.update(streamId, {
+                const updateData = {
                   status: 'scheduled',
                   schedule_time: nextScheduleTime,
                   end_time: nextEndTime
-                });
+                };
+                if (currentStream.audio_mode === 'daily_rotation' && currentStream.audio_ids) {
+                  try {
+                    const ids = typeof currentStream.audio_ids === 'string' ? JSON.parse(currentStream.audio_ids) : currentStream.audio_ids;
+                    if (Array.isArray(ids) && ids.length > 0) {
+                      const nextIdx = ((currentStream.current_audio_index || 0) + 1) % ids.length;
+                      updateData.current_audio_index = nextIdx;
+                      updateData.audio_id = ids[nextIdx];
+                    }
+                  } catch (e) {
+                    console.error('Error advancing daily rotation audio:', e);
+                  }
+                }
+                await Stream.update(streamId, updateData);
                 addStreamLog(streamId, 'Stream rescheduled for tomorrow');
               } else {
                 await Stream.updateStatus(streamId, 'offline', currentStream.user_id);
@@ -668,11 +817,24 @@ async function stopStream(streamId) {
       if (stream.is_daily && baseStartTime && stream.end_time) {
         const nextScheduleTime = new Date(new Date(baseStartTime).getTime() + 24 * 60 * 60 * 1000).toISOString();
         const nextEndTime = new Date(new Date(stream.end_time).getTime() + 24 * 60 * 60 * 1000).toISOString();
-        await Stream.update(streamId, {
+        const updateData = {
           status: 'scheduled',
           schedule_time: nextScheduleTime,
           end_time: nextEndTime
-        });
+        };
+        if (stream.audio_mode === 'daily_rotation' && stream.audio_ids) {
+          try {
+            const ids = typeof stream.audio_ids === 'string' ? JSON.parse(stream.audio_ids) : stream.audio_ids;
+            if (Array.isArray(ids) && ids.length > 0) {
+              const nextIdx = ((stream.current_audio_index || 0) + 1) % ids.length;
+              updateData.current_audio_index = nextIdx;
+              updateData.audio_id = ids[nextIdx];
+            }
+          } catch (e) {
+            console.error('Error advancing daily rotation audio on stop:', e);
+          }
+        }
+        await Stream.update(streamId, updateData);
         addStreamLog(streamId, 'Manual stop: Stream rescheduled for tomorrow');
       } else {
         await Stream.updateStatus(streamId, 'offline', stream.user_id);
@@ -695,7 +857,8 @@ function cleanupTempFiles(streamId) {
   const tempDir = path.join(__dirname, '..', 'temp');
   const files = [
     path.join(tempDir, `playlist_${streamId}.txt`),
-    path.join(tempDir, `playlist_audio_${streamId}.txt`)
+    path.join(tempDir, `playlist_audio_${streamId}.txt`),
+    path.join(tempDir, `stream_bgm_${streamId}.txt`)
   ];
 
   for (const file of files) {
@@ -947,6 +1110,7 @@ module.exports = {
   healthCheckStreams,
   saveStreamHistory,
   gracefulShutdown,
-  setSchedulerService
+  setSchedulerService,
+  buildFFmpegArgs
 };
 

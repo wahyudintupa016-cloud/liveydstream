@@ -31,7 +31,11 @@ class Stream {
       youtube_channel_id = null,
       is_youtube_api = false,
       is_daily = false,
-      channel_name = null
+      channel_name = null,
+      audio_mode = 'none',
+      audio_id = null,
+      audio_ids = null,
+      current_audio_index = 0
     } = streamData;
     const loop_video_int = loop_video ? 1 : 0;
     const use_advanced_settings_int = use_advanced_settings ? 1 : 0;
@@ -45,13 +49,15 @@ class Stream {
           id, title, video_id, rtmp_url, stream_key, platform, platform_icon,
           bitrate, resolution, fps, orientation, loop_video,
           schedule_time, end_time, duration, status, status_updated_at, use_advanced_settings, user_id,
-          youtube_broadcast_id, youtube_stream_id, youtube_description, youtube_privacy, youtube_category, youtube_tags, youtube_thumbnail, youtube_channel_id, is_youtube_api, is_daily, channel_name
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          youtube_broadcast_id, youtube_stream_id, youtube_description, youtube_privacy, youtube_category, youtube_tags, youtube_thumbnail, youtube_channel_id, is_youtube_api, is_daily, channel_name,
+          audio_mode, audio_id, audio_ids, current_audio_index
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           id, title, video_id, rtmp_url, stream_key, platform, platform_icon,
           bitrate, resolution, fps, orientation, loop_video_int,
           schedule_time, end_time, duration, final_status, status_updated_at, use_advanced_settings_int, user_id,
-          youtube_broadcast_id, youtube_stream_id, youtube_description, youtube_privacy, youtube_category, youtube_tags, youtube_thumbnail, youtube_channel_id, is_youtube_api_int, is_daily_int, channel_name
+          youtube_broadcast_id, youtube_stream_id, youtube_description, youtube_privacy, youtube_category, youtube_tags, youtube_thumbnail, youtube_channel_id, is_youtube_api_int, is_daily_int, channel_name,
+          audio_mode, audio_id, typeof audio_ids === 'object' ? JSON.stringify(audio_ids) : audio_ids, current_audio_index
         ],
         function (err) {
           if (err) {
@@ -99,11 +105,15 @@ class Stream {
                END AS video_type,
                yc.channel_name AS youtube_channel_name,
                yc.channel_thumbnail AS youtube_channel_thumbnail,
-               yc.channel_id AS youtube_channel_external_id
+               yc.channel_id AS youtube_channel_external_id,
+               va.title AS audio_title,
+               va.filepath AS audio_filepath,
+               va.duration AS audio_duration
         FROM streams s
         LEFT JOIN videos v ON s.video_id = v.id
         LEFT JOIN playlists p ON s.video_id = p.id
         LEFT JOIN youtube_channels yc ON s.youtube_channel_id = yc.id
+        LEFT JOIN videos va ON s.audio_id = va.id
       `;
       const params = [];
       const conditions = [];
@@ -158,6 +168,7 @@ class Stream {
         LEFT JOIN videos v ON s.video_id = v.id
         LEFT JOIN playlists p ON s.video_id = p.id
         LEFT JOIN youtube_channels yc ON s.youtube_channel_id = yc.id
+        LEFT JOIN videos va ON s.audio_id = va.id
       `;
       const params = [];
       const conditions = [];
@@ -192,7 +203,7 @@ class Stream {
         const selectQuery = `
           SELECT s.*, 
                  v.title AS video_title, 
-                 v.filepath AS video_filepath,
+                 v.filepath AS video_filepath, 
                  v.thumbnail_path AS video_thumbnail, 
                  v.duration AS video_duration,
                  v.resolution AS video_resolution,  
@@ -206,7 +217,10 @@ class Stream {
                  END AS video_type,
                  yc.channel_name AS youtube_channel_name,
                  yc.channel_thumbnail AS youtube_channel_thumbnail,
-                 yc.channel_id AS youtube_channel_external_id
+                 yc.channel_id AS youtube_channel_external_id,
+                 va.title AS audio_title,
+                 va.filepath AS audio_filepath,
+                 va.duration AS audio_duration
           ${baseQuery}
           ORDER BY 
             CASE WHEN s.channel_name IS NULL OR s.channel_name = '' THEN 1 ELSE 0 END,
@@ -401,11 +415,15 @@ class Stream {
                 yc.channel_name AS youtube_channel_name,
                 yc.channel_thumbnail AS youtube_channel_thumbnail,
                 yc.channel_id AS youtube_channel_external_id,
-                yc.subscriber_count AS youtube_subscriber_count
+                yc.subscriber_count AS youtube_subscriber_count,
+                va.title AS audio_title,
+                va.filepath AS audio_filepath,
+                va.duration AS audio_duration
          FROM streams s
          LEFT JOIN videos v ON s.video_id = v.id
          LEFT JOIN playlists p ON s.video_id = p.id
          LEFT JOIN youtube_channels yc ON s.youtube_channel_id = yc.id
+         LEFT JOIN videos va ON s.audio_id = va.id
          WHERE s.id = ?`,
         [id],
         (err, row) => {
