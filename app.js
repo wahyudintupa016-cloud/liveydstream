@@ -255,21 +255,7 @@ app.use('/uploads/avatars', (req, res, next) => {
     next();
   }
 });
-const loginLimiter = rateLimit({
-  windowMs: 2 * 60 * 1000,
-  max: 30,
-  standardHeaders: true,
-  legacyHeaders: false,
-  handler: (req, res) => {
-    res.status(429).render('login', {
-      title: 'Login',
-      error: 'Too many login attempts. Please try again in 2 minutes.'
-    });
-  },
-  requestWasSuccessful: (request, response) => {
-    return response.statusCode < 400;
-  }
-});
+const loginLimiter = (req, res, next) => next();
 const loginDelayMiddleware = async (req, res, next) => {
   await new Promise(resolve => setTimeout(resolve, 1000));
   next();
