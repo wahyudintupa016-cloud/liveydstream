@@ -3696,6 +3696,13 @@ app.post('/api/streams/:id/status', isAuthenticated, [
           stream
         });
       }
+      if (stream.duration && stream.duration > 0) {
+        const newEndTime = new Date(Date.now() + stream.duration * 60000).toISOString();
+        await Stream.update(streamId, { end_time: newEndTime });
+      } else if (stream.end_time && new Date(stream.end_time).getTime() <= Date.now()) {
+        await Stream.update(streamId, { end_time: null });
+      }
+
       const protocol = req.headers['x-forwarded-proto'] || req.protocol;
       const host = req.headers['x-forwarded-host'] || req.get('host');
       const baseUrl = `${protocol}://${host}`;
