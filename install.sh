@@ -75,7 +75,11 @@ else
 fi
 
 echo "▶️ Starting StreamFlow..."
-pm2 start app.js --name streamflow
+if [ -f "ecosystem.config.js" ]; then
+    pm2 start ecosystem.config.js
+else
+    pm2 start app.js --name liveydstream
+fi
 pm2 save
 
 echo

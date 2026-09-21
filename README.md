@@ -46,7 +46,7 @@
 Untuk instalasi otomatis, jalankan perintah berikut:
 
 ```bash
-curl -o install.sh https://raw.https://github.com/wahyudintupa016-cloud/liveydstream/main/install.sh && chmod +x install.sh && ./install.sh
+curl -o install.sh https://raw.githubusercontent.com/wahyudintupa016-cloud/liveydstream/main/install.sh && chmod +x install.sh && ./install.sh
 ```
 
 ## 🔧 Manual Installation
@@ -89,7 +89,7 @@ sudo apt install git -y
 
 Clone repository:
 ```bash
-git clone https://https://github.com/wahyudintupa016-cloud/liveydstream
+git clone https://github.com/wahyudintupa016-cloud/liveydstream.git
 ```
 
 Masuk ke direktori project:
@@ -112,7 +112,7 @@ Konfigurasi port (opsional):
 nano .env
 ```
 
-Jalankan aplikasi:
+Jalankan aplikasi (mode development):
 ```bash
 npm run dev
 ```
@@ -157,9 +157,9 @@ sudo npm install -g pm2
 
 ### 5. Menjalankan Aplikasi
 
-Jalankan aplikasi dengan PM2:
+Jalankan aplikasi dengan PM2 (menggunakan konfigurasi anti-restart):
 ```bash
-pm2 start app.js --name liveydstream
+pm2 start ecosystem.config.js
 ```
 
 **Setup Auto-Restart saat Server Reboot:**
