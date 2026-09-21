@@ -130,13 +130,8 @@ class Stream {
       query += ` ORDER BY 
         CASE WHEN s.channel_name IS NULL OR s.channel_name = '' THEN 1 ELSE 0 END,
         s.channel_name COLLATE NOCASE ASC,
-        CASE s.status 
-          WHEN 'live' THEN 1 
-          WHEN 'scheduled' THEN 2 
-          WHEN 'offline' THEN 3 
-          ELSE 4 
-        END,
-        s.created_at DESC`;
+        s.title COLLATE NOCASE ASC,
+        s.created_at ASC`;
       db.all(query, params, (err, rows) => {
         if (err) {
           console.error('Error finding streams:', err.message);
@@ -216,13 +211,8 @@ class Stream {
           ORDER BY 
             CASE WHEN s.channel_name IS NULL OR s.channel_name = '' THEN 1 ELSE 0 END,
             s.channel_name COLLATE NOCASE ASC,
-            CASE s.status 
-              WHEN 'live' THEN 1 
-              WHEN 'scheduled' THEN 2 
-              WHEN 'offline' THEN 3 
-              ELSE 4 
-            END,
-            s.created_at DESC
+            s.title COLLATE NOCASE ASC,
+            s.created_at ASC
           LIMIT ? OFFSET ?
         `;
         db.all(selectQuery, [...params, limit, offset], (err, rows) => {

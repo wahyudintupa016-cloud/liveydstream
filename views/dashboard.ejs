@@ -156,8 +156,9 @@
         <table class="min-w-full">
           <thead class="bg-gray-700 sticky top-0 z-9">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Stream Name
-              </th>
+              <th class="px-3 py-3 text-center text-xs font-medium text-gray-300 uppercase tracking-wider w-12">#</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Stream Name</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Stream Key</th>
               <% if (typeof youtubeConnected !== 'undefined' && youtubeConnected) { %>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Channel</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Dashboard</th>
@@ -170,7 +171,7 @@
           </thead>
           <tbody class="divide-y divide-gray-700">
             <tr id="empty-state" class="hover:bg-dark-700/50 transition-colors" style="display: none;">
-              <td colspan="<%= (typeof youtubeConnected !== 'undefined' && youtubeConnected) ? '7' : '5' %>" class="px-6 py-10 text-center">
+              <td colspan="<%= (typeof youtubeConnected !== 'undefined' && youtubeConnected) ? '9' : '7' %>" class="px-6 py-10 text-center">
                 <div class="flex flex-col items-center">
                   <div class="w-16 h-16 rounded-full bg-dark-700 flex items-center justify-center mb-4">
                     <i class="ti ti-broadcast text-gray-500 text-2xl"></i>
@@ -1793,7 +1794,7 @@
         });
     });
     let currentPage = 1;
-    let currentLimit = 10;
+    let currentLimit = 50;
     let currentSearch = '';
     let totalStreamsCount = 0;
 
@@ -1941,7 +1942,103 @@
       hidePagination();
     }
 
-    function createMobileStreamCard(stream) {
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function escapeJs(str) {
+      if (!str) return '';
+      return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    }
+
+    function maskStreamKey(key) {
+      if (!key) return '—';
+      if (key.length <= 8) return '••••••••';
+      return key.substring(0, 4) + '••••' + key.slice(-4);
+    }
+
+    function toggleKeyVisibility(btn) {
+      const container = btn.closest('div');
+      const span = container ? container.querySelector('.stream-key-text') : null;
+      const icon = btn.querySelector('i');
+      if (!span) return;
+      const fullKey = span.dataset.fullKey || '';
+      if (!fullKey) return;
+      const isRevealed = span.dataset.revealed === 'true';
+      if (isRevealed) {
+        span.dataset.revealed = 'false';
+        span.textContent = maskStreamKey(fullKey);
+        if (icon) {
+          icon.className = icon.className.replace('ti-eye-off', 'ti-eye').replace('text-primary', '').trim();
+        }
+        btn.title = 'Tampilkan Key';
+      } else {
+        span.dataset.revealed = 'true';
+        span.textContent = fullKey;
+        if (icon) {
+          icon.className = icon.className.replace('ti-eye', 'ti-eye-off') + ' text-primary';
+        }
+        btn.title = 'Sembunyikan Key';
+      }
+    }
+
+    function copyStreamKey(key) {
+      if (!key) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(key).then(() => {
+          showToast('success', 'Stream key berhasil disalin!');
+        }).catch(() => {
+          fallbackCopyStreamKey(key);
+        });
+      } else {
+        fallbackCopyStreamKey(key);
+      }
+    }
+
+    function fallbackCopyStreamKey(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast('success', 'Stream key berhasil disalin!');
+      } catch (e) {
+        showToast('error', 'Gagal menyalin stream key');
+      }
+      document.body.removeChild(ta);
+    }
+
+    function sortStreamsByChannelAndNumber(streams) {
+      if (!Array.isArray(streams)) return [];
+      const list = [...streams];
+      return list.sort((a, b) => {
+        const channelA = (a.channel_name || a.youtube_channel_name || '').trim().toLowerCase();
+        const channelB = (b.channel_name || b.youtube_channel_name || '').trim().toLowerCase();
+        if (!channelA && channelB) return 1;
+        if (channelA && !channelB) return -1;
+        const channelCmp = channelA.localeCompare(channelB, undefined, { sensitivity: 'base' });
+        if (channelCmp !== 0) return channelCmp;
+
+        const titleA = (a.title || '').trim();
+        const titleB = (b.title || '').trim();
+        const titleCmp = titleA.localeCompare(titleB, undefined, { numeric: true, sensitivity: 'base' });
+        if (titleCmp !== 0) return titleCmp;
+
+        return (new Date(a.created_at || 0)) - (new Date(b.created_at || 0));
+      });
+    }
+
+    function createMobileStreamCard(stream, index = 1) {
       const card = document.createElement('div');
       card.className = 'bg-gray-800 rounded-lg shadow-md overflow-hidden';
       card.dataset.streamId = stream.id;
@@ -1998,19 +2095,22 @@
       <div class="p-3">
         <div class="flex gap-3">
           <div class="relative flex-shrink-0 w-20 h-14 bg-dark-700 rounded overflow-hidden">
-            <img src="${thumbnail}" class="w-full h-full object-cover" alt="${stream.title}">
+            <img src="${thumbnail}" class="w-full h-full object-cover" alt="${escapeHtml(stream.title)}">
           </div>
           <div class="flex-1 min-w-0">
-            <h4 class="text-sm font-medium text-white truncate leading-tight">${stream.title}</h4>
+            <div class="flex items-center gap-1.5">
+              <span class="px-1.5 py-0.5 rounded bg-dark-700 text-gray-300 text-[11px] font-mono font-bold border border-gray-700 flex-shrink-0">#${index}</span>
+              <h4 class="text-sm font-medium text-white truncate leading-tight" title="${escapeHtml(stream.title)}">${escapeHtml(stream.title)}</h4>
+            </div>
             ${fileName ? `
-            <div class="text-[11px] text-blue-400 truncate flex items-center gap-1 mt-0.5" title="File: ${fileName}">
+            <div class="text-[11px] text-blue-400 truncate flex items-center gap-1 mt-0.5" title="File: ${escapeHtml(fileName)}">
               <i class="ti ti-movie text-xs flex-shrink-0"></i>
-              <span class="truncate">${fileName}</span>
+              <span class="truncate">${escapeHtml(fileName)}</span>
             </div>` : ''}
             ${displayChannel ? `
-            <div class="text-[11px] text-emerald-400 font-medium truncate flex items-center gap-1 mt-0.5" title="Channel: ${displayChannel}">
+            <div class="text-[11px] text-emerald-400 font-medium truncate flex items-center gap-1 mt-0.5" title="Channel: ${escapeHtml(displayChannel)}">
               <i class="ti ti-device-tv text-xs flex-shrink-0"></i>
-              <span class="truncate">${displayChannel}</span>
+              <span class="truncate">${escapeHtml(displayChannel)}</span>
             </div>` : ''}
             <div class="flex items-center gap-1.5 mt-1">
               <div class="flex items-center text-[10px] text-gray-400">
@@ -2019,6 +2119,20 @@
               </div>
               <span class="text-gray-600 text-[10px]">•</span>
               <span class="text-[10px] text-gray-400 stream-settings-display">${settingsDisplay}</span>
+            </div>
+            <div class="inline-flex items-center gap-1.5 bg-dark-900/90 px-2 py-0.5 rounded border border-gray-700/80 text-[11px] font-mono text-gray-300 mt-1">
+              <i class="ti ti-key text-amber-400 text-[10px] flex-shrink-0"></i>
+              <span class="stream-key-text select-all truncate max-w-[130px]" data-full-key="${escapeHtml(stream.stream_key || '')}" data-revealed="false">
+                ${maskStreamKey(stream.stream_key)}
+              </span>
+              ${stream.stream_key ? `
+              <button type="button" onclick="toggleKeyVisibility(this); event.stopPropagation();" class="text-gray-400 hover:text-white p-0.5" title="Tampilkan/Sembunyikan Key">
+                <i class="ti ti-eye text-[10px]"></i>
+              </button>
+              <button type="button" onclick="copyStreamKey('${escapeJs(stream.stream_key)}'); event.stopPropagation();" class="text-gray-400 hover:text-primary p-0.5" title="Salin Stream Key">
+                <i class="ti ti-copy text-[10px]"></i>
+              </button>
+              ` : ''}
             </div>
             ${youtubeInfoHTML ? `<div class="mt-0.5">${youtubeInfoHTML}</div>` : ''}
             ${scheduleHTML ? `<div class="mt-0.5">${scheduleHTML}</div>` : ''}
@@ -2037,7 +2151,7 @@
       return card;
     }
 
-    function createStreamTableRow(stream) {
+    function createStreamTableRow(stream, index = 1) {
       const row = document.createElement('tr');
       row.className = 'hover:bg-dark-700/50 transition-colors';
       row.dataset.streamId = stream.id;
@@ -2085,17 +2199,22 @@
       const fileName = stream.video_title || stream.playlist_name || '';
       const displayChannel = stream.channel_name || stream.youtube_channel_name || '';
       row.innerHTML = `
+      <td class="px-3 py-4 whitespace-nowrap text-center text-xs font-semibold text-gray-400">
+        <span class="w-6 h-6 inline-flex items-center justify-center rounded-full bg-dark-700 text-gray-300 border border-gray-700 font-mono text-xs">
+          ${index}
+        </span>
+      </td>
       <td class="px-6 py-4 whitespace-nowrap">
         <div class="flex items-center">
           <div class="w-20 h-12 bg-dark-700 rounded flex-shrink-0 overflow-hidden mr-3">
-            <img src="${thumbnail}" class="w-full h-full object-cover" alt="${stream.title}">
+            <img src="${thumbnail}" class="w-full h-full object-cover" alt="${escapeHtml(stream.title)}">
           </div>
           <div class="min-w-0 flex-1">
-            <div class="text-sm font-semibold text-white truncate max-w-[240px]" title="${stream.title}">${stream.title}</div>
+            <div class="text-sm font-semibold text-white truncate max-w-[240px]" title="${escapeHtml(stream.title)}">${escapeHtml(stream.title)}</div>
             ${fileName ? `
-            <div class="text-xs text-blue-400 truncate max-w-[240px] flex items-center gap-1 mt-0.5" title="File: ${fileName}">
+            <div class="text-xs text-blue-400 truncate max-w-[240px] flex items-center gap-1 mt-0.5" title="File: ${escapeHtml(fileName)}">
               <i class="ti ti-movie text-xs flex-shrink-0"></i>
-              <span class="truncate">${fileName}</span>
+              <span class="truncate">${escapeHtml(fileName)}</span>
             </div>` : ''}
             ${displayChannel ? `
             <div class="text-xs text-emerald-400 font-medium truncate max-w-[240px] flex items-center gap-1 mt-0.5" title="Channel: ${displayChannel}">
@@ -2106,6 +2225,30 @@
           </div>
         </div>
       </td>
+      <td class="px-6 py-4 whitespace-nowrap">
+        <div class="inline-flex items-center gap-1.5 bg-dark-900/90 px-2.5 py-1.5 rounded-lg border border-gray-700/80 text-xs">
+          <i class="ti ti-key text-amber-400 text-xs flex-shrink-0"></i>
+          <span class="font-mono text-gray-300 stream-key-text select-all" 
+                data-full-key="${escapeHtml(stream.stream_key || '')}" 
+                data-revealed="false">
+            ${maskStreamKey(stream.stream_key)}
+          </span>
+          ${stream.stream_key ? `
+          <button type="button" 
+                  onclick="toggleKeyVisibility(this); event.stopPropagation();" 
+                  class="text-gray-400 hover:text-white p-0.5 rounded transition-colors" 
+                  title="Tampilkan/Sembunyikan Key">
+            <i class="ti ti-eye text-xs"></i>
+          </button>
+          <button type="button" 
+                  onclick="copyStreamKey('${escapeJs(stream.stream_key)}'); event.stopPropagation();" 
+                  class="text-gray-400 hover:text-primary p-0.5 rounded transition-colors" 
+                  title="Salin Stream Key">
+            <i class="ti ti-copy text-xs"></i>
+          </button>
+          ` : ''}
+        </div>
+      </td>
       ${youtubeConnected ? `
       <td class="px-6 py-4 whitespace-nowrap">
         ${stream.youtube_channel_name && stream.youtube_channel_external_id ? `
@@ -2113,7 +2256,7 @@
            target="_blank" 
            rel="noopener noreferrer"
            class="inline-flex items-center gap-1.5 hover:transition-colors group"
-           title="${stream.youtube_channel_name}">
+           title="${escapeHtml(stream.youtube_channel_name)}">
           ${stream.youtube_channel_thumbnail ? `
           <img src="${stream.youtube_channel_thumbnail}" alt="" class="w-5 h-5 rounded-full object-cover">
           ` : `
@@ -2121,7 +2264,7 @@
             <i class="ti ti-brand-youtube text-white text-xs"></i>
           </div>
           `}
-          <span class="text-sm group-hover:text-gray-300">${stream.youtube_channel_name}</span>
+          <span class="text-sm group-hover:text-gray-300">${escapeHtml(stream.youtube_channel_name)}</span>
         </a>
         ` : '<span class="text-gray-500 text-xs">—</span>'}
       </td>
@@ -2198,11 +2341,14 @@
       const mobileContainer = document.querySelector('.block.md\\:hidden.space-y-2');
       if (!mobileContainer) return;
       mobileContainer.innerHTML = '';
+      const sortedStreams = sortStreamsByChannelAndNumber(streams);
       let lastChannel = null;
-      streams.forEach(stream => {
+      let channelStreamIndex = 0;
+      sortedStreams.forEach(stream => {
         const currentChannel = stream.channel_name || stream.youtube_channel_name || '';
         if (currentChannel !== lastChannel) {
           lastChannel = currentChannel;
+          channelStreamIndex = 0;
           const groupHeader = document.createElement('div');
           groupHeader.className = 'flex items-center gap-2 px-3 py-1.5 bg-dark-900/90 rounded-lg border border-gray-700/60 mt-3 first:mt-0';
           groupHeader.innerHTML = `
@@ -2214,7 +2360,8 @@
           `;
           mobileContainer.appendChild(groupHeader);
         }
-        const card = createMobileStreamCard(stream);
+        channelStreamIndex++;
+        const card = createMobileStreamCard(stream, channelStreamIndex);
         mobileContainer.appendChild(card);
       });
     }
@@ -2229,11 +2376,14 @@
       if (emptyState) {
         emptyState.style.display = 'none';
       }
+      const sortedStreams = sortStreamsByChannelAndNumber(streams);
       let lastChannel = null;
-      streams.forEach(stream => {
+      let channelStreamIndex = 0;
+      sortedStreams.forEach(stream => {
         const currentChannel = stream.channel_name || stream.youtube_channel_name || '';
         if (currentChannel !== lastChannel) {
           lastChannel = currentChannel;
+          channelStreamIndex = 0;
           const groupHeader = document.createElement('tr');
           groupHeader.className = 'bg-dark-900/90 border-t border-b border-gray-700/80';
           groupHeader.innerHTML = `
@@ -2249,7 +2399,8 @@
           `;
           tableBody.insertBefore(groupHeader, emptyState);
         }
-        const row = createStreamTableRow(stream);
+        channelStreamIndex++;
+        const row = createStreamTableRow(stream, channelStreamIndex);
         tableBody.insertBefore(row, emptyState);
       });
     }
@@ -2320,7 +2471,7 @@
         }
         updateStreamCounters(initialStreamsData);
       } else {
-        fetchStreams(1, 10, '');
+        fetchStreams(1, currentLimit, '');
       }
       startCountdowns();
       startLiveTimers();
