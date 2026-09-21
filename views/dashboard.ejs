@@ -379,65 +379,38 @@
                   Server time: loading...
                 </span>
               </div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="h-[42px] mt-3 flex items-center justify-between">
-                  <label class="text-sm text-gray-300">Loop Video</label>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                <div class="h-[44px] flex items-center justify-between bg-dark-700/60 px-3 rounded-lg border border-gray-700">
+                  <label class="text-xs sm:text-sm text-gray-300 font-medium">Loop Video</label>
                   <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" name="loopVideo" class="sr-only peer" checked>
-                    <div class="w-11 h-6 bg-dark-700 rounded-full peer peer-checked:bg-primary"></div>
-                    <div class="absolute left-[2px] top-[2px] w-5 h-5 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
+                    <div class="w-10 h-5 bg-dark-600 rounded-full peer peer-checked:bg-primary"></div>
+                    <div class="absolute left-[2px] top-[2px] w-4 h-4 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
                   </label>
                 </div>
-                <div class="h-[42px] mt-3 flex items-center justify-between">
-                  <label class="text-sm text-gray-300">Jadwal Berulang Harian</label>
+                <div class="h-[44px] flex items-center justify-between bg-dark-700/60 px-3 rounded-lg border border-gray-700">
+                  <label class="text-xs sm:text-sm text-gray-300 font-medium">Jadwal Harian</label>
                   <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" id="isDaily" name="isDaily" class="sr-only peer">
-                    <div class="w-11 h-6 bg-dark-700 rounded-full peer peer-checked:bg-primary"></div>
-                    <div class="absolute left-[2px] top-[2px] w-5 h-5 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
+                    <div class="w-10 h-5 bg-dark-600 rounded-full peer peer-checked:bg-primary"></div>
+                    <div class="absolute left-[2px] top-[2px] w-4 h-4 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
                   </label>
                 </div>
-                <div>
-                  <label class="text-xs text-gray-400 block mb-1">Start Stream</label>
-                  <input type="datetime-local" id="scheduleStartTime" name="scheduleStartTime"
-                    class="w-full h-[42px] px-4 bg-dark-700 border border-gray-600 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary text-sm [color-scheme:dark]">
-                </div>
-                <div>
-                  <label class="text-xs text-gray-400 mb-1 flex items-end">
-                    <span>Durasi Stream</span>
+                <div class="h-[44px] flex items-center justify-between bg-dark-700/60 px-3 rounded-lg border border-purple-700/70">
+                  <div class="flex items-center gap-1.5">
+                    <i class="ti ti-music text-purple-400"></i>
+                    <label class="text-xs sm:text-sm text-purple-200 font-medium">Audio Terpisah</label>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="enableSeparateAudio" class="sr-only peer">
+                    <div class="w-10 h-5 bg-dark-600 rounded-full peer peer-checked:bg-purple-600"></div>
+                    <div class="absolute left-[2px] top-[2px] w-4 h-4 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
                   </label>
-                  <div class="flex gap-2">
-                    <input type="number" id="durationHours" name="durationHours" min="0" placeholder="Jam" class="w-full h-[42px] px-2 bg-dark-700 border border-gray-600 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary text-sm [color-scheme:dark]">
-                    <input type="number" id="durationMinutes" name="durationMinutes" min="0" max="59" placeholder="Menit" class="w-full h-[42px] px-2 bg-dark-700 border border-gray-600 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary text-sm [color-scheme:dark]">
-                    <input type="number" id="durationSeconds" name="durationSeconds" min="0" max="59" placeholder="Detik" class="w-full h-[42px] px-2 bg-dark-700 border border-gray-600 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary text-sm [color-scheme:dark]">
-                  </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Audio Terpisah (Background Music) -->
-            <div class="space-y-4 pt-2 border-t border-gray-700">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center">
-                  <i class="ti ti-music text-purple-400 mr-2 text-lg"></i>
-                  <span class="text-sm font-medium text-white">Audio Terpisah (Background Music)</span>
-                  <div class="relative ml-2 group">
-                    <i class="ti ti-info-circle text-gray-400 hover:text-primary"></i>
-                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-72 p-2.5 bg-dark-600 text-xs text-gray-200 rounded-md shadow-lg z-20 pointer-events-none">
-                      <div class="text-center font-normal">
-                        Memutar video dan audio terpisah. Video & audio akan di-looping secara independen (misal: video 3 menit, audio 30 menit) tanpa beban re-encoding video.
-                      </div>
-                      <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-dark-600"></div>
-                    </div>
-                  </div>
-                </div>
-                <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" id="enableSeparateAudio" class="sr-only peer">
-                  <div class="w-11 h-6 bg-dark-700 rounded-full peer peer-checked:bg-purple-600"></div>
-                  <div class="absolute left-[2px] top-[2px] w-5 h-5 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
-                </label>
-              </div>
-
-              <div id="separateAudioContent" class="hidden space-y-3 bg-dark-900/60 p-3.5 rounded-lg border border-purple-900/40">
+              <!-- Audio Terpisah Container (Expandable) -->
+              <div id="separateAudioContent" class="hidden space-y-3 bg-dark-900/80 p-3.5 rounded-lg border border-purple-800/50 mt-2">
                 <!-- Mode Selection -->
                 <div>
                   <label class="text-xs text-gray-300 block mb-1.5 font-medium">Mode Audio:</label>
@@ -484,6 +457,25 @@
                   <p id="dailyRotationNote" class="text-[11px] text-purple-300/80 hidden">
                     <i class="ti ti-info-circle mr-1"></i> Saat jadwal berulang harian aktif, audio akan otomatis berpindah ke file berikutnya setiap hari.
                   </p>
+                </div>
+              </div>
+
+              <!-- Start Time & Duration -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <div>
+                  <label class="text-xs text-gray-400 block mb-1">Start Stream</label>
+                  <input type="datetime-local" id="scheduleStartTime" name="scheduleStartTime"
+                    class="w-full h-[42px] px-4 bg-dark-700 border border-gray-600 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary text-sm [color-scheme:dark]">
+                </div>
+                <div>
+                  <label class="text-xs text-gray-400 mb-1 flex items-end">
+                    <span>Durasi Stream</span>
+                  </label>
+                  <div class="flex gap-2">
+                    <input type="number" id="durationHours" name="durationHours" min="0" placeholder="Jam" class="w-full h-[42px] px-2 bg-dark-700 border border-gray-600 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary text-sm [color-scheme:dark]">
+                    <input type="number" id="durationMinutes" name="durationMinutes" min="0" max="59" placeholder="Menit" class="w-full h-[42px] px-2 bg-dark-700 border border-gray-600 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary text-sm [color-scheme:dark]">
+                    <input type="number" id="durationSeconds" name="durationSeconds" min="0" max="59" placeholder="Detik" class="w-full h-[42px] px-2 bg-dark-700 border border-gray-600 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary text-sm [color-scheme:dark]">
+                  </div>
                 </div>
               </div>
             </div>
@@ -939,65 +931,38 @@
                   Server time: loading...
                 </span>
               </div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="h-[42px] flex items-center justify-between">
-                  <label class="text-sm text-gray-300">Loop Video</label>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                <div class="h-[44px] flex items-center justify-between bg-dark-700/60 px-3 rounded-lg border border-gray-700">
+                  <label class="text-xs sm:text-sm text-gray-300 font-medium">Loop Video</label>
                   <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" name="loopVideo" id="editLoopVideo" class="sr-only peer" checked>
-                    <div class="w-11 h-6 bg-dark-700 rounded-full peer peer-checked:bg-primary"></div>
-                    <div class="absolute left-[2px] top-[2px] w-5 h-5 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
+                    <div class="w-10 h-5 bg-dark-600 rounded-full peer peer-checked:bg-primary"></div>
+                    <div class="absolute left-[2px] top-[2px] w-4 h-4 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
                   </label>
                 </div>
-                <div class="h-[42px] flex items-center justify-between">
-                  <label class="text-sm text-gray-300">Jadwal Berulang Harian</label>
+                <div class="h-[44px] flex items-center justify-between bg-dark-700/60 px-3 rounded-lg border border-gray-700">
+                  <label class="text-xs sm:text-sm text-gray-300 font-medium">Jadwal Harian</label>
                   <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" id="editIsDaily" name="isDaily" class="sr-only peer">
-                    <div class="w-11 h-6 bg-dark-700 rounded-full peer peer-checked:bg-primary"></div>
-                    <div class="absolute left-[2px] top-[2px] w-5 h-5 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
+                    <div class="w-10 h-5 bg-dark-600 rounded-full peer peer-checked:bg-primary"></div>
+                    <div class="absolute left-[2px] top-[2px] w-4 h-4 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
                   </label>
                 </div>
-                <div>
-                  <label class="text-xs text-gray-400 block mb-1">Start Stream</label>
-                  <input type="datetime-local" id="editScheduleStartTime" name="scheduleStartTime"
-                    class="w-full h-[42px] px-4 bg-dark-700 border border-gray-600 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary text-sm [color-scheme:dark]">
-                </div>
-                <div>
-                  <label class="text-xs text-gray-400 mb-1 flex items-end">
-                    <span>Durasi Stream</span>
+                <div class="h-[44px] flex items-center justify-between bg-dark-700/60 px-3 rounded-lg border border-purple-700/70">
+                  <div class="flex items-center gap-1.5">
+                    <i class="ti ti-music text-purple-400"></i>
+                    <label class="text-xs sm:text-sm text-purple-200 font-medium">Audio Terpisah</label>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="editEnableSeparateAudio" class="sr-only peer">
+                    <div class="w-10 h-5 bg-dark-600 rounded-full peer peer-checked:bg-purple-600"></div>
+                    <div class="absolute left-[2px] top-[2px] w-4 h-4 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
                   </label>
-                  <div class="flex gap-2">
-                    <input type="number" id="editDurationHours" name="durationHours" min="0" placeholder="Jam" class="w-full h-[42px] px-2 bg-dark-700 border border-gray-600 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary text-sm [color-scheme:dark]">
-                    <input type="number" id="editDurationMinutes" name="durationMinutes" min="0" max="59" placeholder="Menit" class="w-full h-[42px] px-2 bg-dark-700 border border-gray-600 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary text-sm [color-scheme:dark]">
-                    <input type="number" id="editDurationSeconds" name="durationSeconds" min="0" max="59" placeholder="Detik" class="w-full h-[42px] px-2 bg-dark-700 border border-gray-600 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary text-sm [color-scheme:dark]">
-                  </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Audio Terpisah (Background Music) - Edit Modal -->
-            <div class="space-y-4 pt-2 border-t border-gray-700">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center">
-                  <i class="ti ti-music text-purple-400 mr-2 text-lg"></i>
-                  <span class="text-sm font-medium text-white">Audio Terpisah (Background Music)</span>
-                  <div class="relative ml-2 group">
-                    <i class="ti ti-info-circle text-gray-400 hover:text-primary"></i>
-                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-72 p-2.5 bg-dark-600 text-xs text-gray-200 rounded-md shadow-lg z-20 pointer-events-none">
-                      <div class="text-center font-normal">
-                        Memutar video dan audio terpisah. Video & audio akan di-looping secara independen tanpa beban re-encoding video.
-                      </div>
-                      <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-dark-600"></div>
-                    </div>
-                  </div>
-                </div>
-                <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" id="editEnableSeparateAudio" class="sr-only peer">
-                  <div class="w-11 h-6 bg-dark-700 rounded-full peer peer-checked:bg-purple-600"></div>
-                  <div class="absolute left-[2px] top-[2px] w-5 h-5 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
-                </label>
-              </div>
-
-              <div id="editSeparateAudioContent" class="hidden space-y-3 bg-dark-900/60 p-3.5 rounded-lg border border-purple-900/40">
+              <!-- Audio Terpisah Container (Expandable) -->
+              <div id="editSeparateAudioContent" class="hidden space-y-3 bg-dark-900/80 p-3.5 rounded-lg border border-purple-800/50 mt-2">
                 <!-- Mode Selection -->
                 <div>
                   <label class="text-xs text-gray-300 block mb-1.5 font-medium">Mode Audio:</label>
@@ -1044,6 +1009,25 @@
                   <p id="editDailyRotationNote" class="text-[11px] text-purple-300/80 hidden">
                     <i class="ti ti-info-circle mr-1"></i> Saat jadwal berulang harian aktif, audio akan otomatis berpindah ke file berikutnya setiap hari.
                   </p>
+                </div>
+              </div>
+
+              <!-- Start Time & Duration -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <div>
+                  <label class="text-xs text-gray-400 block mb-1">Start Stream</label>
+                  <input type="datetime-local" id="editScheduleStartTime" name="scheduleStartTime"
+                    class="w-full h-[42px] px-4 bg-dark-700 border border-gray-600 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary text-sm [color-scheme:dark]">
+                </div>
+                <div>
+                  <label class="text-xs text-gray-400 mb-1 flex items-end">
+                    <span>Durasi Stream</span>
+                  </label>
+                  <div class="flex gap-2">
+                    <input type="number" id="editDurationHours" name="durationHours" min="0" placeholder="Jam" class="w-full h-[42px] px-2 bg-dark-700 border border-gray-600 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary text-sm [color-scheme:dark]">
+                    <input type="number" id="editDurationMinutes" name="durationMinutes" min="0" max="59" placeholder="Menit" class="w-full h-[42px] px-2 bg-dark-700 border border-gray-600 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary text-sm [color-scheme:dark]">
+                    <input type="number" id="editDurationSeconds" name="durationSeconds" min="0" max="59" placeholder="Detik" class="w-full h-[42px] px-2 bg-dark-700 border border-gray-600 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary text-sm [color-scheme:dark]">
+                  </div>
                 </div>
               </div>
             </div>
