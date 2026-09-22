@@ -2011,7 +2011,14 @@
         if (enableSchedule) {
           const scheduleStart = document.getElementById('ytScheduleStart').value;
           const scheduleEnd = document.getElementById('ytScheduleEnd').value;
-          if (scheduleStart) ytFormData.scheduleStartTime = scheduleStart;
+          if (scheduleStart) {
+            const startMs = new Date(scheduleStart).getTime();
+            if (startMs < Date.now() - 60000) {
+              showToast('error', 'Waktu mulai jadwal (Start Stream) tidak boleh di masa lalu!');
+              return;
+            }
+            ytFormData.scheduleStartTime = scheduleStart;
+          }
           if (scheduleEnd) ytFormData.scheduleEndTime = scheduleEnd;
         }
 
@@ -2136,6 +2143,11 @@
       };
       const scheduleStartTime = document.getElementById('scheduleStartTime')?.value;
       if (scheduleStartTime) {
+        const startMs = new Date(scheduleStartTime).getTime();
+        if (startMs < Date.now() - 60000) {
+          showToast('error', 'Waktu mulai jadwal (Start Stream) tidak boleh di masa lalu!');
+          return;
+        }
         formData.scheduleStartTime = scheduleStartTime;
       }
       formData.isDaily = document.getElementById('isDaily')?.checked || false;
@@ -4030,6 +4042,7 @@
       requestAnimationFrame(() => {
         modal.classList.add('active');
       });
+      if (typeof updateMinScheduleTimes === 'function') updateMinScheduleTimes();
       updateDurationBadge(true);
     }
     
@@ -4360,7 +4373,15 @@
             
             const enableSchedule = document.getElementById('editYtEnableSchedule').checked;
             if (enableSchedule) {
-              ytFormDataObj.scheduleStartTime = document.getElementById('editYtScheduleStart').value;
+              const scheduleStart = document.getElementById('editYtScheduleStart').value;
+              if (scheduleStart) {
+                const startMs = new Date(scheduleStart).getTime();
+                if (startMs < Date.now() - 60000) {
+                  showToast('error', 'Waktu mulai jadwal (Start Stream) tidak boleh di masa lalu!');
+                  return;
+                }
+              }
+              ytFormDataObj.scheduleStartTime = scheduleStart;
               ytFormDataObj.scheduleEndTime = document.getElementById('editYtScheduleEnd').value;
             } else {
               ytFormDataObj.scheduleStartTime = '';
@@ -4472,6 +4493,13 @@
             useAdvancedSettings: !document.getElementById('editAdvancedSettingsContent').classList.contains('hidden')
           };
           const scheduleStartTime = document.getElementById('editScheduleStartTime')?.value;
+          if (scheduleStartTime) {
+            const startMs = new Date(scheduleStartTime).getTime();
+            if (startMs < Date.now() - 60000) {
+              showToast('error', 'Waktu mulai jadwal (Start Stream) tidak boleh di masa lalu!');
+              return;
+            }
+          }
           formData.scheduleStartTime = scheduleStartTime || '';
           formData.isDaily = document.getElementById('editIsDaily')?.checked || false;
 
@@ -4554,6 +4582,7 @@
       });
     }
     document.addEventListener('DOMContentLoaded', function () {
+      if (typeof updateMinScheduleTimes === 'function') updateMinScheduleTimes();
       setupAdvancedSettings('advancedSettingsToggle', 'advancedSettingsContent', 'advancedSettingsCheckbox');
       setupAdvancedSettings('editAdvancedSettingsToggle', 'editAdvancedSettingsContent', 'editAdvancedSettingsCheckbox');
 

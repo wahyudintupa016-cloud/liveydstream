@@ -20,7 +20,27 @@ function openNewStreamModal() {
   }
   requestAnimationFrame(() => { modal.classList.add('active'); });
   loadGalleryVideos();
+  updateMinScheduleTimes();
   if (typeof loadAudioOptions === 'function') loadAudioOptions();
+}
+
+function updateMinScheduleTimes() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const minDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+
+  const scheduleStartTime = document.getElementById('scheduleStartTime');
+  if (scheduleStartTime) scheduleStartTime.min = minDateTime;
+  const ytScheduleStart = document.getElementById('ytScheduleStart');
+  if (ytScheduleStart) ytScheduleStart.min = minDateTime;
+  const editScheduleStartTime = document.getElementById('editScheduleStartTime');
+  if (editScheduleStartTime) editScheduleStartTime.min = minDateTime;
+  const editYtScheduleStart = document.getElementById('editYtScheduleStart');
+  if (editYtScheduleStart) editYtScheduleStart.min = minDateTime;
 }
 
 function closeNewStreamModal() {

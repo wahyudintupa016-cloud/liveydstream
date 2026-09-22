@@ -3141,6 +3141,12 @@ app.post('/api/streams', isAuthenticated, [
     
     if (req.body.scheduleStartTime) {
       const scheduleStartDate = parseLocalDateTime(req.body.scheduleStartTime);
+      if (scheduleStartDate.getTime() < Date.now() - 30000) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Waktu mulai jadwal (Start Stream) tidak boleh di masa lalu. Silakan pilih waktu yang akan datang.' 
+        });
+      }
       streamData.schedule_time = scheduleStartDate.toISOString();
       streamData.status = 'scheduled';
       
@@ -3161,6 +3167,12 @@ app.post('/api/streams', isAuthenticated, [
           return res.status(400).json({ 
             success: false, 
             error: 'End time must be after start time' 
+          });
+        }
+        if (scheduleEndDate.getTime() <= Date.now()) {
+          return res.status(400).json({
+            success: false,
+            error: 'Waktu selesai (End Time) atau durasi stream sudah terlewat di masa lalu.'
           });
         }
         streamData.end_time = scheduleEndDate.toISOString();
@@ -3285,18 +3297,43 @@ app.post('/api/streams/youtube', isAuthenticated, uploadThumbnail.single('thumbn
       const [year, month, day] = datePart.split('-').map(Number);
       const [hours, minutes] = timePart.split(':').map(Number);
       const scheduleDate = new Date(year, month - 1, day, hours, minutes);
+      if (scheduleDate.getTime() < Date.now() - 30000) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Waktu mulai jadwal (Start Stream) tidak boleh di masa lalu. Silakan pilih waktu yang akan datang.' 
+        });
+      }
       streamData.schedule_time = scheduleDate.toISOString();
       streamData.status = 'scheduled';
+
+      if (scheduleEndTime) {
+        const [endDatePart, endTimePart] = scheduleEndTime.split('T');
+        const [endYear, endMonth, endDay] = endDatePart.split('-').map(Number);
+        const [endHours, endMinutes] = endTimePart.split(':').map(Number);
+        const endDate = new Date(endYear, endMonth - 1, endDay, endHours, endMinutes);
+        if (endDate <= scheduleDate) {
+          return res.status(400).json({ 
+            success: false, 
+            error: 'End time must be after start time' 
+          });
+        }
+        if (endDate.getTime() <= Date.now()) {
+          return res.status(400).json({
+            success: false,
+            error: 'Waktu selesai (End Time) sudah terlewat di masa lalu.'
+          });
+        }
+        streamData.end_time = endDate.toISOString();
+      }
     } else {
       streamData.status = 'offline';
-    }
-    
-    if (scheduleEndTime) {
-      const [datePart, timePart] = scheduleEndTime.split('T');
-      const [year, month, day] = datePart.split('-').map(Number);
-      const [hours, minutes] = timePart.split(':').map(Number);
-      const endDate = new Date(year, month - 1, day, hours, minutes);
-      streamData.end_time = endDate.toISOString();
+      if (scheduleEndTime) {
+        const [endDatePart, endTimePart] = scheduleEndTime.split('T');
+        const [endYear, endMonth, endDay] = endDatePart.split('-').map(Number);
+        const [endHours, endMinutes] = endTimePart.split(':').map(Number);
+        const endDate = new Date(endYear, endMonth - 1, endDay, endHours, endMinutes);
+        streamData.end_time = endDate.toISOString();
+      }
     }
     
     const stream = await Stream.create(streamData);
@@ -3409,11 +3446,29 @@ app.put('/api/streams/:id', isAuthenticated, uploadThumbnail.single('thumbnail')
       
       if (req.body.scheduleStartTime) {
         const scheduleStartDate = parseScheduleDateTime(req.body.scheduleStartTime);
+        if (stream.status !== 'live' && scheduleStartDate.getTime() < Date.now() - 30000) {
+          return res.status(400).json({ 
+            success: false, 
+            error: 'Waktu mulai jadwal (Start Stream) tidak boleh di masa lalu. Silakan pilih waktu yang akan datang.' 
+          });
+        }
         updateData.schedule_time = scheduleStartDate.toISOString();
         updateData.status = 'scheduled';
         
         if (req.body.scheduleEndTime) {
           const scheduleEndDate = parseScheduleDateTime(req.body.scheduleEndTime);
+          if (scheduleEndDate <= scheduleStartDate) {
+            return res.status(400).json({ 
+              success: false, 
+              error: 'End time must be after start time' 
+            });
+          }
+          if (stream.status !== 'live' && scheduleEndDate.getTime() <= Date.now()) {
+            return res.status(400).json({
+              success: false,
+              error: 'Waktu selesai (End Time) sudah terlewat di masa lalu.'
+            });
+          }
           updateData.end_time = scheduleEndDate.toISOString();
         } else if ('scheduleEndTime' in req.body && !req.body.scheduleEndTime) {
           updateData.end_time = null;
@@ -3626,6 +3681,12 @@ app.put('/api/streams/:id', isAuthenticated, uploadThumbnail.single('thumbnail')
 
     if (req.body.scheduleStartTime) {
       const scheduleStartDate = parseLocalDateTime(req.body.scheduleStartTime);
+      if (stream.status !== 'live' && scheduleStartDate.getTime() < Date.now() - 30000) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Waktu mulai jadwal (Start Stream) tidak boleh di masa lalu. Silakan pilih waktu yang akan datang.' 
+        });
+      }
       updateData.schedule_time = scheduleStartDate.toISOString();
       updateData.status = 'scheduled';
       
@@ -3646,6 +3707,12 @@ app.put('/api/streams/:id', isAuthenticated, uploadThumbnail.single('thumbnail')
           return res.status(400).json({ 
             success: false, 
             error: 'End time must be after start time' 
+          });
+        }
+        if (stream.status !== 'live' && scheduleEndDate.getTime() <= Date.now()) {
+          return res.status(400).json({
+            success: false,
+            error: 'Waktu selesai (End Time) atau durasi stream sudah terlewat di masa lalu.'
           });
         }
         
