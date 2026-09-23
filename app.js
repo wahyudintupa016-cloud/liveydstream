@@ -122,13 +122,13 @@ app.use(session({
     dir: path.join(__dirname, 'db'),
     table: 'sessions'
   }),
-  secret: process.env.SESSION_SECRET,
+  secret: process.env.SESSION_SECRET || 'streamflow-secure-session-secret-key-default-32',
   resave: false,
   saveUninitialized: false,
   rolling: true,
   cookie: {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: 'auto',
     maxAge: 24 * 60 * 60 * 1000
   }
 }));

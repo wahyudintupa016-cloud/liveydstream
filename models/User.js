@@ -4,7 +4,7 @@ const { v4: uuidv4 } = require('uuid');
 class User {
   static findByEmail(email) {
     return new Promise((resolve, reject) => {
-      db.get('SELECT * FROM users WHERE email = ?', [email], (err, row) => {
+      db.get('SELECT * FROM users WHERE email = ? COLLATE NOCASE', [email], (err, row) => {
         if (err) {
           return reject(err);
         }
@@ -14,7 +14,7 @@ class User {
   }
   static findByUsername(username) {
     return new Promise((resolve, reject) => {
-      db.get('SELECT * FROM users WHERE username = ?', [username], (err, row) => {
+      db.get('SELECT * FROM users WHERE username = ? COLLATE NOCASE', [username], (err, row) => {
         if (err) {
           return reject(err);
         }
@@ -56,26 +56,40 @@ class User {
       throw error;
     }
   }
-  static update(userId, userData) {
-    const fields = [];
-    const values = [];
-    Object.entries(userData).forEach(([key, value]) => {
-      fields.push(`${key} = ?`);
-      values.push(value);
-    });
-    fields.push('updated_at = CURRENT_TIMESTAMP');
-    values.push(userId);
-    const query = `UPDATE users SET ${fields.join(', ')} WHERE id = ?`;
-    return new Promise((resolve, reject) => {
-      db.run(query, values, function (err) {
-        if (err) {
-          return reject(err);
-        }
-        resolve({ id: userId, ...userData });
+  static async update(userId, userData) {
+    try {
+      const dataToUpdate = { ...userData };
+      if (dataToUpdate.password && !dataToUpdate.password.startsWith('$2b$') && !dataToUpdate.password.startsWith('$2a$')) {
+        dataToUpdate.password = await bcrypt.hash(dataToUpdate.password, 10);
+      }
+      const fields = [];
+      const values = [];
+      Object.entries(dataToUpdate).forEach(([key, value]) => {
+        fields.push(`${key} = ?`);
+        values.push(value);
       });
-    });
+      fields.push('updated_at = CURRENT_TIMESTAMP');
+      values.push(userId);
+      const query = `UPDATE users SET ${fields.join(', ')} WHERE id = ?`;
+      return new Promise((resolve, reject) => {
+        db.run(query, values, function (err) {
+          if (err) {
+            return reject(err);
+          }
+          resolve({ id: userId, ...dataToUpdate });
+        });
+      });
+    } catch (error) {
+      console.error("Error in User.update:", error);
+      throw error;
+    }
   }
   static async verifyPassword(plainPassword, hashedPassword) {
+    if (!hashedPassword) return false;
+    // Fallback if password was saved in plain text
+    if (!hashedPassword.startsWith('$2b$') && !hashedPassword.startsWith('$2a$')) {
+      return plainPassword === hashedPassword;
+    }
     return bcrypt.compare(plainPassword, hashedPassword);
   }
 
