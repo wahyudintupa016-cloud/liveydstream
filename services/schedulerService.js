@@ -154,6 +154,23 @@ function getScheduledTermination(streamId) {
   };
 }
 
+function scheduleStreamTerminationByEndTime(streamId, endTimeISO, userId = null) {
+  const endTime = new Date(endTimeISO);
+  const now = Date.now();
+  const timeUntilEnd = endTime.getTime() - now;
+  
+  if (timeUntilEnd <= 0) {
+    // Already expired, stop immediately
+    if (streamingService) {
+      streamingService.stopStream(streamId).catch(() => {});
+    }
+    return;
+  }
+  
+  const durationMinutes = timeUntilEnd / 60000;
+  scheduleStreamTermination(streamId, durationMinutes, userId);
+}
+
 function handleStreamStopped(streamId) {
   return cancelStreamTermination(streamId);
 }
@@ -177,6 +194,7 @@ function shutdown() {
 module.exports = {
   init,
   scheduleStreamTermination,
+  scheduleStreamTerminationByEndTime,
   cancelStreamTermination,
   getScheduledTermination,
   handleStreamStopped,

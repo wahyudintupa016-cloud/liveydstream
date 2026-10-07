@@ -3761,6 +3761,45 @@ app.put('/api/streams/:id', isAuthenticated, uploadThumbnail.single('thumbnail')
     res.status(500).json({ success: false, error: 'Failed to update stream' });
   }
 });
+
+app.patch('/api/streams/:id/duration', isAuthenticated, async (req, res) => {
+  try {
+    const stream = await Stream.findById(req.params.id);
+    if (!stream) {
+      return res.status(404).json({ success: false, error: 'Stream not found' });
+    }
+    if (stream.user_id !== req.session.userId) {
+      return res.status(403).json({ success: false, error: 'Not authorized' });
+    }
+    if (stream.status !== 'live') {
+      return res.status(400).json({ success: false, error: 'Stream is not currently live' });
+    }
+    
+    const h = parseInt(req.body.durationHours) || 0;
+    const m = parseInt(req.body.durationMinutes) || 0;
+    const s = parseInt(req.body.durationSeconds) || 0;
+    const totalMs = (h * 3600000) + (m * 60000) + (s * 1000);
+    
+    if (totalMs <= 0) {
+      await Stream.update(req.params.id, { end_time: null, duration: null });
+      schedulerService.cancelStreamTermination(req.params.id);
+      return res.json({ success: true, message: 'Durasi dihapus, stream berjalan tanpa batas waktu', end_time: null });
+    }
+    
+    const newEndTime = new Date(Date.now() + totalMs).toISOString();
+    const durationMinutes = Math.round(totalMs / 60000);
+    await Stream.update(req.params.id, { end_time: newEndTime, duration: durationMinutes > 0 ? durationMinutes : null });
+    
+    schedulerService.cancelStreamTermination(req.params.id);
+    schedulerService.scheduleStreamTerminationByEndTime(req.params.id, newEndTime, req.session.userId);
+    
+    return res.json({ success: true, message: 'Durasi berhasil diperbarui', end_time: newEndTime });
+  } catch (error) {
+    console.error('Error updating stream duration:', error);
+    res.status(500).json({ success: false, error: 'Failed to update duration' });
+  }
+});
+
 app.delete('/api/streams/:id', isAuthenticated, async (req, res) => {
   try {
     const stream = await Stream.findById(req.params.id);

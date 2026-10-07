@@ -1284,6 +1284,49 @@
       </div>
     </div>
   </div>
+
+  <!-- Edit Duration Live Modal -->
+  <div id="editDurationLiveModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] hidden transition-all duration-300 opacity-0" onclick="if(event.target===this)closeEditDurationLiveModal()">
+    <div class="bg-dark-800 border border-gray-700 rounded-xl shadow-2xl w-full max-w-sm mx-4 transform scale-95 transition-all duration-300">
+      <div class="flex items-center justify-between p-4 border-b border-gray-700">
+        <div class="flex items-center gap-2">
+          <i class="ti ti-clock-edit text-purple-400 text-lg"></i>
+          <h3 class="text-base font-semibold text-white">Edit Durasi Live</h3>
+        </div>
+        <button onclick="closeEditDurationLiveModal()" class="p-1 hover:bg-dark-700 rounded-lg transition-colors">
+          <i class="ti ti-x text-gray-400 hover:text-white"></i>
+        </button>
+      </div>
+      <div class="p-4 space-y-4">
+        <input type="hidden" id="editDurationLiveStreamId">
+        <p class="text-xs text-gray-400">Ubah sisa durasi stream yang sedang live. Durasi dihitung mulai dari sekarang.</p>
+        <div>
+          <label class="text-xs text-gray-300 block mb-1.5 font-medium">Durasi Baru (dari sekarang):</label>
+          <div class="grid grid-cols-3 gap-2">
+            <div>
+              <input type="number" id="liveDurationHours" min="0" placeholder="Jam" class="w-full h-[42px] px-2 bg-dark-700 border border-gray-600 rounded-lg focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-sm text-gray-200 [color-scheme:dark]">
+              <span class="text-[10px] text-gray-500 mt-0.5 block text-center">Jam</span>
+            </div>
+            <div>
+              <input type="number" id="liveDurationMinutes" min="0" max="59" placeholder="Menit" class="w-full h-[42px] px-2 bg-dark-700 border border-gray-600 rounded-lg focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-sm text-gray-200 [color-scheme:dark]">
+              <span class="text-[10px] text-gray-500 mt-0.5 block text-center">Menit</span>
+            </div>
+            <div>
+              <input type="number" id="liveDurationSeconds" min="0" max="59" placeholder="Detik" class="w-full h-[42px] px-2 bg-dark-700 border border-gray-600 rounded-lg focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-sm text-gray-200 [color-scheme:dark]">
+              <span class="text-[10px] text-gray-500 mt-0.5 block text-center">Detik</span>
+            </div>
+          </div>
+        </div>
+        <p class="text-[11px] text-yellow-400/80"><i class="ti ti-info-circle mr-1"></i>Kosongkan semua field untuk menghapus batas durasi (stream berjalan tanpa batas).</p>
+      </div>
+      <div class="flex items-center justify-end gap-2 p-4 border-t border-gray-700">
+        <button onclick="closeEditDurationLiveModal()" class="px-4 py-2 text-sm text-gray-300 hover:text-white bg-dark-700 hover:bg-dark-600 rounded-lg transition-colors">Batal</button>
+        <button onclick="submitEditDurationLive()" class="px-4 py-2 text-sm text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors flex items-center gap-1.5">
+          <i class="ti ti-check"></i> Simpan Durasi
+        </button>
+      </div>
+    </div>
+  </div>
   <style>
     @media (min-width: 1600px) {
       .\33xl\:grid-cols-5 {
@@ -1495,10 +1538,14 @@
           multiList.innerHTML = '<div class="text-xs text-gray-400 text-center py-2">Belum ada file audio. Silakan upload audio di halaman Media.</div>';
         } else {
           multiList.innerHTML = '';
-          audios.forEach(a => {
+          audios.forEach((a, idx) => {
             const item = document.createElement('label');
-            item.className = 'flex items-center gap-2 p-1.5 rounded hover:bg-dark-700 cursor-pointer text-xs text-gray-200 transition-colors';
+            item.className = 'flex items-center gap-2 p-1.5 rounded hover:bg-dark-700 cursor-pointer text-xs text-gray-200 transition-colors audio-drag-item';
+            item.setAttribute('draggable', 'true');
+            item.setAttribute('data-audio-id', a.id);
             item.innerHTML = `
+              <span class="audio-drag-handle cursor-grab active:cursor-grabbing text-gray-500 hover:text-gray-300 flex-shrink-0" title="Geser untuk mengubah urutan"><i class="ti ti-grip-vertical text-sm"></i></span>
+              <span class="audio-order-num bg-purple-900/60 text-purple-300 text-[10px] font-bold w-5 h-5 rounded flex items-center justify-center flex-shrink-0">${idx + 1}</span>
               <input type="checkbox" value="${a.id}" class="rounded border-gray-600 text-purple-600 focus:ring-purple-500 bg-dark-900 h-3.5 w-3.5" onchange="updateSelectedAudioCount()">
               <i class="ti ti-music text-purple-400 text-sm"></i>
               <span class="truncate flex-1 font-medium">${escapeHtml(a.name)}</span>
@@ -1506,6 +1553,7 @@
             `;
             multiList.appendChild(item);
           });
+          initAudioDragDrop(multiList, 'create');
         }
       }
 
@@ -1528,10 +1576,14 @@
           editMultiList.innerHTML = '<div class="text-xs text-gray-400 text-center py-2">Belum ada file audio. Silakan upload audio di halaman Media.</div>';
         } else {
           editMultiList.innerHTML = '';
-          audios.forEach(a => {
+          audios.forEach((a, idx) => {
             const item = document.createElement('label');
-            item.className = 'flex items-center gap-2 p-1.5 rounded hover:bg-dark-700 cursor-pointer text-xs text-gray-200 transition-colors';
+            item.className = 'flex items-center gap-2 p-1.5 rounded hover:bg-dark-700 cursor-pointer text-xs text-gray-200 transition-colors audio-drag-item';
+            item.setAttribute('draggable', 'true');
+            item.setAttribute('data-audio-id', a.id);
             item.innerHTML = `
+              <span class="audio-drag-handle cursor-grab active:cursor-grabbing text-gray-500 hover:text-gray-300 flex-shrink-0" title="Geser untuk mengubah urutan"><i class="ti ti-grip-vertical text-sm"></i></span>
+              <span class="audio-order-num bg-purple-900/60 text-purple-300 text-[10px] font-bold w-5 h-5 rounded flex items-center justify-center flex-shrink-0">${idx + 1}</span>
               <input type="checkbox" value="${a.id}" class="rounded border-gray-600 text-purple-600 focus:ring-purple-500 bg-dark-900 h-3.5 w-3.5" onchange="updateEditSelectedAudioCount()">
               <i class="ti ti-music text-purple-400 text-sm"></i>
               <span class="truncate flex-1 font-medium">${escapeHtml(a.name)}</span>
@@ -1539,6 +1591,7 @@
             `;
             editMultiList.appendChild(item);
           });
+          initAudioDragDrop(editMultiList, 'edit');
         }
       }
     }
@@ -1553,6 +1606,77 @@
       const count = document.querySelectorAll('#editMultiAudioList input[type="checkbox"]:checked').length;
       const el = document.getElementById('editSelectedAudioCount');
       if (el) el.textContent = `${count} terpilih`;
+    }
+
+    function updateAudioOrderNumbers(container) {
+      const items = container.querySelectorAll('.audio-drag-item');
+      items.forEach((item, idx) => {
+        const numEl = item.querySelector('.audio-order-num');
+        if (numEl) numEl.textContent = idx + 1;
+      });
+    }
+
+    function initAudioDragDrop(container, mode) {
+      let dragSrcEl = null;
+
+      container.addEventListener('dragstart', function(e) {
+        const item = e.target.closest('.audio-drag-item');
+        if (!item) return;
+        dragSrcEl = item;
+        item.style.opacity = '0.4';
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', '');
+      });
+
+      container.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        const item = e.target.closest('.audio-drag-item');
+        if (!item || item === dragSrcEl) return;
+        const rect = item.getBoundingClientRect();
+        const midY = rect.top + rect.height / 2;
+        if (e.clientY < midY) {
+          item.style.borderTop = '2px solid #a855f7';
+          item.style.borderBottom = '';
+        } else {
+          item.style.borderBottom = '2px solid #a855f7';
+          item.style.borderTop = '';
+        }
+      });
+
+      container.addEventListener('dragleave', function(e) {
+        const item = e.target.closest('.audio-drag-item');
+        if (item) {
+          item.style.borderTop = '';
+          item.style.borderBottom = '';
+        }
+      });
+
+      container.addEventListener('drop', function(e) {
+        e.preventDefault();
+        const item = e.target.closest('.audio-drag-item');
+        if (!item || !dragSrcEl || item === dragSrcEl) return;
+        item.style.borderTop = '';
+        item.style.borderBottom = '';
+        const rect = item.getBoundingClientRect();
+        const midY = rect.top + rect.height / 2;
+        if (e.clientY < midY) {
+          container.insertBefore(dragSrcEl, item);
+        } else {
+          container.insertBefore(dragSrcEl, item.nextSibling);
+        }
+        updateAudioOrderNumbers(container);
+      });
+
+      container.addEventListener('dragend', function(e) {
+        const items = container.querySelectorAll('.audio-drag-item');
+        items.forEach(item => {
+          item.style.opacity = '';
+          item.style.borderTop = '';
+          item.style.borderBottom = '';
+        });
+        dragSrcEl = null;
+      });
     }
 
     function setAudioMode(mode) {
@@ -2563,6 +2687,7 @@
         <div>${statusBadge}</div>
         <div class="flex items-center gap-1.5">
           ${getActionButtonHTML(stream.status, stream.id, 'mobile')}
+          ${stream.status === 'live' ? `<button class="p-1 hover:bg-dark-700 rounded transition-colors" onclick="openEditDurationLiveModal('${stream.id}')" title="Edit Durasi"><i class="ti ti-clock-edit text-purple-400 hover:text-purple-300 text-sm"></i></button>` : ''}
           <button class="p-1 hover:bg-dark-700 rounded transition-colors ${stream.status === 'live' || stream.status === 'scheduled' ? 'opacity-50 cursor-not-allowed' : ''}" onclick="${stream.status === 'live' || stream.status === 'scheduled' ? '' : `editStream('${stream.id}')`}" ${stream.status === 'live' || stream.status === 'scheduled' ? 'disabled' : ''}><i class="ti ti-edit text-gray-400 hover:text-white text-sm"></i></button>
           <button class="p-1 hover:bg-dark-700 rounded transition-colors ${stream.status === 'live' || stream.status === 'scheduled' ? 'opacity-50 cursor-not-allowed' : ''}" onclick="${stream.status === 'live' || stream.status === 'scheduled' ? '' : `deleteStream('${stream.id}')`}" ${stream.status === 'live' || stream.status === 'scheduled' ? 'disabled' : ''}><i class="ti ti-trash text-gray-400 hover:text-red-400 text-sm"></i></button>
         </div>
@@ -2747,6 +2872,9 @@
         <div class="flex items-center justify-end space-x-2">
           ${getActionButtonHTML(stream.status, stream.id, 'desktop')}
           <div class="ml-2 flex items-center gap-1">
+            ${stream.status === 'live' ? `<button class="p-1.5 hover:bg-dark-700 rounded transition-colors" onclick="openEditDurationLiveModal('${stream.id}')" title="Edit Durasi">
+              <i class="ti ti-clock-edit text-purple-400 hover:text-purple-300"></i>
+            </button>` : ''}
             <button class="p-1.5 hover:bg-dark-700 rounded transition-colors ${stream.status === 'live' || stream.status === 'scheduled' ? 'opacity-50 cursor-not-allowed' : ''}" 
                     onclick="${stream.status === 'live' || stream.status === 'scheduled' ? '' : `editStream('${stream.id}')`}"
                     ${stream.status === 'live' || stream.status === 'scheduled' ? 'disabled' : ''}>
@@ -4023,10 +4151,37 @@
             try {
               ids = typeof stream.audio_ids === 'string' ? JSON.parse(stream.audio_ids) : (stream.audio_ids || []);
             } catch (e) { ids = []; }
-            const checkboxes = document.querySelectorAll('#editMultiAudioList input[type="checkbox"]');
-            checkboxes.forEach(cb => {
-              cb.checked = Array.isArray(ids) && ids.includes(cb.value);
-            });
+            const container = document.getElementById('editMultiAudioList');
+            if (container && Array.isArray(ids) && ids.length > 0) {
+              const items = Array.from(container.querySelectorAll('.audio-drag-item'));
+              const itemMap = new Map();
+              items.forEach(item => {
+                const cb = item.querySelector('input[type="checkbox"]');
+                if (cb) itemMap.set(cb.value, item);
+              });
+              ids.forEach(id => {
+                const item = itemMap.get(id);
+                if (item) {
+                  container.appendChild(item);
+                  const cb = item.querySelector('input[type="checkbox"]');
+                  if (cb) cb.checked = true;
+                  itemMap.delete(id);
+                }
+              });
+              itemMap.forEach(item => {
+                container.appendChild(item);
+                const cb = item.querySelector('input[type="checkbox"]');
+                if (cb) cb.checked = false;
+              });
+              if (typeof updateAudioOrderNumbers === 'function') {
+                updateAudioOrderNumbers(container);
+              }
+            } else {
+              const checkboxes = document.querySelectorAll('#editMultiAudioList input[type="checkbox"]');
+              checkboxes.forEach(cb => {
+                cb.checked = Array.isArray(ids) && ids.includes(cb.value);
+              });
+            }
             updateEditSelectedAudioCount();
           }
         });
@@ -4581,6 +4736,85 @@
         });
       });
     }
+
+    function openEditDurationLiveModal(streamId) {
+      document.getElementById('editDurationLiveStreamId').value = streamId;
+      document.getElementById('liveDurationHours').value = '';
+      document.getElementById('liveDurationMinutes').value = '';
+      document.getElementById('liveDurationSeconds').value = '';
+      
+      // Pre-fill with remaining duration
+      fetch(`/api/streams/${streamId}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.success && data.stream && data.stream.end_time) {
+            const remaining = new Date(data.stream.end_time).getTime() - Date.now();
+            if (remaining > 0) {
+              const totalSec = Math.floor(remaining / 1000);
+              const h = Math.floor(totalSec / 3600);
+              const m = Math.floor((totalSec % 3600) / 60);
+              const s = totalSec % 60;
+              document.getElementById('liveDurationHours').value = h > 0 ? h : '';
+              document.getElementById('liveDurationMinutes').value = m > 0 ? m : '';
+              document.getElementById('liveDurationSeconds').value = s > 0 ? s : '';
+            }
+          }
+        })
+        .catch(() => {});
+      
+      const modal = document.getElementById('editDurationLiveModal');
+      modal.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        modal.classList.remove('opacity-0');
+        const box = modal.querySelector('div > div');
+        if (box) box.classList.remove('scale-95');
+      });
+    }
+
+    function closeEditDurationLiveModal() {
+      const modal = document.getElementById('editDurationLiveModal');
+      modal.classList.add('opacity-0');
+      const box = modal.querySelector('div > div');
+      if (box) box.classList.add('scale-95');
+      setTimeout(() => modal.classList.add('hidden'), 300);
+    }
+
+    function submitEditDurationLive() {
+      const streamId = document.getElementById('editDurationLiveStreamId').value;
+      if (!streamId) return;
+      
+      const h = document.getElementById('liveDurationHours').value;
+      const m = document.getElementById('liveDurationMinutes').value;
+      const s = document.getElementById('liveDurationSeconds').value;
+      
+      fetch(`/api/streams/${streamId}/duration`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(typeof csrfToken !== 'undefined' && csrfToken ? { 'X-CSRF-Token': csrfToken } : {})
+        },
+        body: JSON.stringify({
+          durationHours: h || '0',
+          durationMinutes: m || '0',
+          durationSeconds: s || '0'
+        })
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (data.success) {
+            showToast('success', data.message || 'Durasi berhasil diperbarui');
+            closeEditDurationLiveModal();
+            fetchStreams(currentPage, currentLimit, currentSearch);
+          } else {
+            showToast('error', data.error || 'Gagal memperbarui durasi');
+          }
+        })
+        .catch(err => {
+          console.error('Error updating duration:', err);
+          showToast('error', 'Terjadi kesalahan saat memperbarui durasi');
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
       if (typeof updateMinScheduleTimes === 'function') updateMinScheduleTimes();
       setupAdvancedSettings('advancedSettingsToggle', 'advancedSettingsContent', 'advancedSettingsCheckbox');
