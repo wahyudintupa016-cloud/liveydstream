@@ -1,5 +1,6 @@
 <% layout('layout') -%>
-<div class="md:hidden mb-4" style="margin-top: -10px;">
+<div class="sticky top-16 lg:top-14 z-20 bg-dark-900/95 backdrop-blur-md pt-2 pb-3 -mx-6 px-6 border-b border-gray-800/80 shadow-md transition-all">
+<div class="md:hidden mb-1">
   <div class="bg-gray-800 rounded-lg px-3 py-2 shadow-md">
     <div class="flex items-center justify-between gap-2 overflow-x-auto scrollbar-hide">
       <div class="flex items-center gap-1.5 flex-shrink-0">
@@ -34,8 +35,8 @@
     </div>
   </div>
 </div>
-  <div class="hidden md:grid md:grid-cols-2 lg:grid-cols-4 3xl:grid-cols-5 gap-6 mb-6">
-    <div class="bg-gray-800 rounded-lg p-6 shadow-md">
+  <div class="hidden md:grid md:grid-cols-2 lg:grid-cols-4 3xl:grid-cols-5 gap-4 3xl:gap-6 mb-0">
+    <div class="bg-gray-800 rounded-lg p-4 sm:p-5 shadow-md">
       <div class="flex items-center justify-between">
         <h3 class="text-lg font-semibold">Active Streams</h3>
         <div class="w-10 h-10 bg-dark-700 rounded-lg flex items-center justify-center">
@@ -141,7 +142,8 @@
       </div>
     </div>
   </div>
-  <div class="sm:mt-8 mt-4">
+</div>
+  <div class="sm:mt-6 mt-4">
     <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between sm:mb-6 mb-3">
       <div class="flex items-center gap-3">
         <h2 class="text-xl font-bold">Streaming Status</h2>
@@ -240,8 +242,20 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div class="space-y-4">
                 <div class="relative">
-                  <label class="text-sm font-medium text-white block mb-2">Select Video</label>
-                  <div class="relative">
+                  <div class="flex items-center justify-between mb-2">
+                    <label class="text-sm font-medium text-white">Select Video</label>
+                    <div class="flex items-center gap-1 bg-dark-900 p-0.5 rounded-lg border border-gray-700 text-xs">
+                      <button type="button" id="videoModeSingleBtn" onclick="setVideoMode('single')" class="px-2.5 py-1 rounded-md bg-primary text-white font-medium transition-colors">1 Video</button>
+                      <button type="button" id="videoModeRotationBtn" onclick="setVideoMode('daily_rotation')" class="px-2.5 py-1 rounded-md text-gray-400 hover:text-white transition-colors flex items-center gap-1">
+                        <i class="ti ti-calendar-repeat text-xs"></i>
+                        <span>Rotasi Harian</span>
+                      </button>
+                    </div>
+                  </div>
+                  <input type="hidden" id="videoMode" name="videoMode" value="single">
+
+                  <!-- Single Video Selector -->
+                  <div id="singleVideoContainer" class="relative">
                     <button type="button" onclick="toggleVideoSelector()"
                       class="w-full flex items-center justify-between px-4 py-2.5 bg-dark-700 border border-gray-600 rounded-lg hover:border-primary focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-left">
                       <span class="text-sm text-gray-300" id="selectedVideo">Choose a video...</span>
@@ -260,6 +274,20 @@
                       <div id="videoListContainer" class="p-2 space-y-1 max-h-60 overflow-y-auto">
                       </div>
                     </div>
+                  </div>
+
+                  <!-- Multi Video Rotation Selector -->
+                  <div id="multiVideoContainer" class="hidden space-y-2 bg-dark-900/80 p-3 rounded-lg border border-blue-800/50">
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs text-gray-300 font-medium">Pilih Video Rotasi (Hari 1, 2, 3...):</span>
+                      <span id="selectedVideoCount" class="text-[11px] text-blue-400 font-medium">0 terpilih</span>
+                    </div>
+                    <div id="multiVideoList" class="max-h-48 overflow-y-auto space-y-1 bg-dark-800 p-2 rounded-lg border border-gray-700">
+                      <div class="text-xs text-gray-400 text-center py-2">Memuat video...</div>
+                    </div>
+                    <p class="text-[11px] text-blue-300/80">
+                      <i class="ti ti-info-circle mr-1"></i> Live otomatis berganti ke video berikutnya setiap hari. Geser <i class="ti ti-grip-vertical"></i> untuk atur urutan hari.
+                    </p>
                   </div>
                 </div>
                 <div class="lg:hidden bg-dark-900 rounded-lg overflow-hidden">
@@ -792,8 +820,20 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div class="space-y-4">
                 <div class="relative">
-                  <label class="text-sm font-medium text-white block mb-2">Select Video</label>
-                  <div class="relative">
+                  <div class="flex items-center justify-between mb-2">
+                    <label class="text-sm font-medium text-white">Select Video</label>
+                    <div class="flex items-center gap-1 bg-dark-900 p-0.5 rounded-lg border border-gray-700 text-xs">
+                      <button type="button" id="editVideoModeSingleBtn" onclick="setEditVideoMode('single')" class="px-2.5 py-1 rounded-md bg-primary text-white font-medium transition-colors">1 Video</button>
+                      <button type="button" id="editVideoModeRotationBtn" onclick="setEditVideoMode('daily_rotation')" class="px-2.5 py-1 rounded-md text-gray-400 hover:text-white transition-colors flex items-center gap-1">
+                        <i class="ti ti-calendar-repeat text-xs"></i>
+                        <span>Rotasi Harian</span>
+                      </button>
+                    </div>
+                  </div>
+                  <input type="hidden" id="editVideoMode" name="videoMode" value="single">
+
+                  <!-- Single Video Selector -->
+                  <div id="editSingleVideoContainer" class="relative">
                     <button type="button" onclick="toggleEditVideoSelector()"
                       class="w-full flex items-center justify-between px-4 py-2.5 bg-dark-700 border border-gray-600 rounded-lg hover:border-primary focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-left">
                       <span class="text-sm text-gray-300" id="editSelectedVideo">Choose a video...</span>
@@ -812,6 +852,20 @@
                       <div id="editVideoListContainer" class="p-2 space-y-1 max-h-60 overflow-y-auto">
                       </div>
                     </div>
+                  </div>
+
+                  <!-- Edit Multi Video Rotation Selector -->
+                  <div id="editMultiVideoContainer" class="hidden space-y-2 bg-dark-900/80 p-3 rounded-lg border border-blue-800/50">
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs text-gray-300 font-medium">Pilih Video Rotasi (Hari 1, 2, 3...):</span>
+                      <span id="editSelectedVideoCount" class="text-[11px] text-blue-400 font-medium">0 terpilih</span>
+                    </div>
+                    <div id="editMultiVideoList" class="max-h-48 overflow-y-auto space-y-1 bg-dark-800 p-2 rounded-lg border border-gray-700">
+                      <div class="text-xs text-gray-400 text-center py-2">Memuat video...</div>
+                    </div>
+                    <p class="text-[11px] text-blue-300/80">
+                      <i class="ti ti-info-circle mr-1"></i> Live otomatis berganti ke video berikutnya setiap hari. Geser <i class="ti ti-grip-vertical"></i> untuk atur urutan hari.
+                    </p>
                   </div>
                 </div>
                 <div class="lg:hidden bg-dark-900 rounded-lg overflow-hidden">
@@ -1679,6 +1733,240 @@
       });
     }
 
+    let currentVideoMode = 'single';
+    let currentEditVideoMode = 'single';
+    let cachedStreamVideos = null;
+
+    function setVideoMode(mode) {
+      currentVideoMode = mode;
+      const modeInput = document.getElementById('videoMode');
+      if (modeInput) modeInput.value = mode;
+      
+      const singleBtn = document.getElementById('videoModeSingleBtn');
+      const rotationBtn = document.getElementById('videoModeRotationBtn');
+      const singleContainer = document.getElementById('singleVideoContainer');
+      const multiContainer = document.getElementById('multiVideoContainer');
+      
+      if (mode === 'single') {
+        if (singleBtn) {
+          singleBtn.className = 'px-2.5 py-1 rounded-md bg-primary text-white font-medium transition-colors';
+        }
+        if (rotationBtn) {
+          rotationBtn.className = 'px-2.5 py-1 rounded-md text-gray-400 hover:text-white transition-colors flex items-center gap-1';
+        }
+        if (singleContainer) singleContainer.classList.remove('hidden');
+        if (multiContainer) multiContainer.classList.add('hidden');
+      } else {
+        if (rotationBtn) {
+          rotationBtn.className = 'px-2.5 py-1 rounded-md bg-blue-600 text-white font-medium transition-colors flex items-center gap-1';
+        }
+        if (singleBtn) {
+          singleBtn.className = 'px-2.5 py-1 rounded-md text-gray-400 hover:text-white transition-colors';
+        }
+        if (singleContainer) singleContainer.classList.add('hidden');
+        if (multiContainer) multiContainer.classList.remove('hidden');
+        
+        const dailyCheckbox = document.querySelector('input[name="isDaily"]');
+        if (dailyCheckbox) dailyCheckbox.checked = true;
+        
+        loadVideoRotationOptions();
+      }
+    }
+
+    function setEditVideoMode(mode) {
+      currentEditVideoMode = mode;
+      const modeInput = document.getElementById('editVideoMode');
+      if (modeInput) modeInput.value = mode;
+      
+      const singleBtn = document.getElementById('editVideoModeSingleBtn');
+      const rotationBtn = document.getElementById('editVideoModeRotationBtn');
+      const singleContainer = document.getElementById('editSingleVideoContainer');
+      const multiContainer = document.getElementById('editMultiVideoContainer');
+      
+      if (mode === 'single') {
+        if (singleBtn) {
+          singleBtn.className = 'px-2.5 py-1 rounded-md bg-primary text-white font-medium transition-colors';
+        }
+        if (rotationBtn) {
+          rotationBtn.className = 'px-2.5 py-1 rounded-md text-gray-400 hover:text-white transition-colors flex items-center gap-1';
+        }
+        if (singleContainer) singleContainer.classList.remove('hidden');
+        if (multiContainer) multiContainer.classList.add('hidden');
+      } else {
+        if (rotationBtn) {
+          rotationBtn.className = 'px-2.5 py-1 rounded-md bg-blue-600 text-white font-medium transition-colors flex items-center gap-1';
+        }
+        if (singleBtn) {
+          singleBtn.className = 'px-2.5 py-1 rounded-md text-gray-400 hover:text-white transition-colors';
+        }
+        if (singleContainer) singleContainer.classList.add('hidden');
+        if (multiContainer) multiContainer.classList.remove('hidden');
+        
+        const editDailyCheckbox = document.getElementById('editIsDaily');
+        if (editDailyCheckbox) editDailyCheckbox.checked = true;
+        
+        loadVideoRotationOptions();
+      }
+    }
+
+    async function loadVideoRotationOptions(forceReload = false, callback = null) {
+      if (cachedStreamVideos && !forceReload) {
+        populateVideoRotationSelects(cachedStreamVideos);
+        if (callback) callback(cachedStreamVideos);
+        return;
+      }
+      try {
+        const res = await fetch('/api/stream/videos');
+        const videos = await res.json();
+        if (Array.isArray(videos)) {
+          cachedStreamVideos = videos;
+          populateVideoRotationSelects(cachedStreamVideos);
+          if (callback) callback(cachedStreamVideos);
+        }
+      } catch (err) {
+        console.error('Error loading videos for rotation:', err);
+      }
+    }
+
+    function populateVideoRotationSelects(videos) {
+      const multiList = document.getElementById('multiVideoList');
+      if (multiList) {
+        if (videos.length === 0) {
+          multiList.innerHTML = '<div class="text-xs text-gray-400 text-center py-2">Belum ada file video. Silakan upload video di Gallery.</div>';
+        } else {
+          multiList.innerHTML = '';
+          videos.forEach((v, idx) => {
+            const item = document.createElement('label');
+            item.className = 'flex items-center gap-2 p-1.5 rounded hover:bg-dark-700 cursor-pointer text-xs text-gray-200 transition-colors video-drag-item';
+            item.setAttribute('draggable', 'true');
+            item.setAttribute('data-video-id', v.id);
+            item.innerHTML = `
+              <span class="video-drag-handle cursor-grab active:cursor-grabbing text-gray-500 hover:text-gray-300 flex-shrink-0" title="Geser untuk mengubah urutan hari"><i class="ti ti-grip-vertical text-sm"></i></span>
+              <span class="video-order-num bg-blue-900/70 text-blue-300 text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center justify-center flex-shrink-0">Hari ${idx + 1}</span>
+              <input type="checkbox" value="${v.id}" class="rounded border-gray-600 text-blue-600 focus:ring-blue-500 bg-dark-900 h-3.5 w-3.5" onchange="updateSelectedVideoCount()">
+              <div class="w-8 h-6 bg-dark-700 rounded overflow-hidden flex-shrink-0">
+                <img src="${v.thumbnail || '/images/default-video-thumbnail.svg'}" class="w-full h-full object-cover" alt="" onerror="this.src='/images/default-video-thumbnail.svg'">
+              </div>
+              <span class="truncate flex-1 font-medium">${escapeHtml(v.name)}</span>
+              <span class="text-gray-400 text-[11px]">${v.duration || '0:00'}</span>
+            `;
+            multiList.appendChild(item);
+          });
+          initVideoDragDrop(multiList);
+        }
+      }
+
+      const editMultiList = document.getElementById('editMultiVideoList');
+      if (editMultiList) {
+        if (videos.length === 0) {
+          editMultiList.innerHTML = '<div class="text-xs text-gray-400 text-center py-2">Belum ada file video. Silakan upload video di Gallery.</div>';
+        } else {
+          editMultiList.innerHTML = '';
+          videos.forEach((v, idx) => {
+            const item = document.createElement('label');
+            item.className = 'flex items-center gap-2 p-1.5 rounded hover:bg-dark-700 cursor-pointer text-xs text-gray-200 transition-colors video-drag-item';
+            item.setAttribute('draggable', 'true');
+            item.setAttribute('data-video-id', v.id);
+            item.innerHTML = `
+              <span class="video-drag-handle cursor-grab active:cursor-grabbing text-gray-500 hover:text-gray-300 flex-shrink-0" title="Geser untuk mengubah urutan hari"><i class="ti ti-grip-vertical text-sm"></i></span>
+              <span class="video-order-num bg-blue-900/70 text-blue-300 text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center justify-center flex-shrink-0">Hari ${idx + 1}</span>
+              <input type="checkbox" value="${v.id}" class="rounded border-gray-600 text-blue-600 focus:ring-blue-500 bg-dark-900 h-3.5 w-3.5" onchange="updateEditSelectedVideoCount()">
+              <div class="w-8 h-6 bg-dark-700 rounded overflow-hidden flex-shrink-0">
+                <img src="${v.thumbnail || '/images/default-video-thumbnail.svg'}" class="w-full h-full object-cover" alt="" onerror="this.src='/images/default-video-thumbnail.svg'">
+              </div>
+              <span class="truncate flex-1 font-medium">${escapeHtml(v.name)}</span>
+              <span class="text-gray-400 text-[11px]">${v.duration || '0:00'}</span>
+            `;
+            editMultiList.appendChild(item);
+          });
+          initVideoDragDrop(editMultiList);
+        }
+      }
+    }
+
+    function updateSelectedVideoCount() {
+      const count = document.querySelectorAll('#multiVideoList input[type="checkbox"]:checked').length;
+      const el = document.getElementById('selectedVideoCount');
+      if (el) el.textContent = `${count} terpilih`;
+    }
+
+    function updateEditSelectedVideoCount() {
+      const count = document.querySelectorAll('#editMultiVideoList input[type="checkbox"]:checked').length;
+      const el = document.getElementById('editSelectedVideoCount');
+      if (el) el.textContent = `${count} terpilih`;
+    }
+
+    function updateVideoOrderNumbers(container) {
+      const items = container.querySelectorAll('.video-drag-item');
+      items.forEach((item, idx) => {
+        const numEl = item.querySelector('.video-order-num');
+        if (numEl) numEl.textContent = `Hari ${idx + 1}`;
+      });
+    }
+
+    function initVideoDragDrop(container) {
+      let dragSrcEl = null;
+
+      container.addEventListener('dragstart', function(e) {
+        const item = e.target.closest('.video-drag-item');
+        if (!item) return;
+        dragSrcEl = item;
+        item.style.opacity = '0.4';
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', '');
+      });
+
+      container.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        const item = e.target.closest('.video-drag-item');
+        if (!item || item === dragSrcEl) return;
+        const rect = item.getBoundingClientRect();
+        const midY = rect.top + rect.height / 2;
+        if (e.clientY < midY) {
+          item.style.borderTop = '2px solid #3b82f6';
+          item.style.borderBottom = '';
+        } else {
+          item.style.borderBottom = '2px solid #3b82f6';
+          item.style.borderTop = '';
+        }
+      });
+
+      container.addEventListener('dragleave', function(e) {
+        const item = e.target.closest('.video-drag-item');
+        if (item) {
+          item.style.borderTop = '';
+          item.style.borderBottom = '';
+        }
+      });
+
+      container.addEventListener('drop', function(e) {
+        e.preventDefault();
+        const item = e.target.closest('.video-drag-item');
+        if (!item || !dragSrcEl || item === dragSrcEl) return;
+        item.style.borderTop = '';
+        item.style.borderBottom = '';
+        const rect = item.getBoundingClientRect();
+        const midY = rect.top + rect.height / 2;
+        if (e.clientY < midY) {
+          container.insertBefore(dragSrcEl, item);
+        } else {
+          container.insertBefore(dragSrcEl, item.nextSibling);
+        }
+        updateVideoOrderNumbers(container);
+      });
+
+      container.addEventListener('dragend', function(e) {
+        const items = container.querySelectorAll('.video-drag-item');
+        items.forEach(item => {
+          item.style.opacity = '';
+          item.style.borderTop = '';
+          item.style.borderBottom = '';
+        });
+        dragSrcEl = null;
+      });
+    }
+
     function setAudioMode(mode) {
       currentAudioMode = mode;
       const singleBtn = document.getElementById('audioModeSingleBtn');
@@ -2230,23 +2518,37 @@
         return;
       }
       
-      const videoId = document.getElementById('selectedVideoId').value;
-      if (!videoId) {
-        showToast('error', 'Please select a video before creating the stream');
-        const videoSelector = document.querySelector('[onclick="toggleVideoSelector()"]');
-        videoSelector.classList.add('border-red-500');
-        videoSelector.classList.remove('border-gray-600');
-        videoSelector.animate([
-          { transform: 'translateX(0px)' },
-          { transform: 'translateX(-5px)' },
-          { transform: 'translateX(5px)' },
-          { transform: 'translateX(-5px)' },
-          { transform: 'translateX(0px)' }
-        ], {
-          duration: 300,
-          iterations: 1
-        });
-        return;
+      let finalVideoId = '';
+      let videoIdsList = [];
+      if (currentVideoMode === 'daily_rotation') {
+        const checkedVideoBoxes = Array.from(document.querySelectorAll('#multiVideoList input[type="checkbox"]:checked'));
+        if (checkedVideoBoxes.length === 0) {
+          showToast('error', 'Silakan pilih minimal 1 video untuk rotasi harian');
+          return;
+        }
+        videoIdsList = checkedVideoBoxes.map(cb => cb.value);
+        finalVideoId = videoIdsList[0];
+      } else {
+        finalVideoId = document.getElementById('selectedVideoId').value;
+        if (!finalVideoId) {
+          showToast('error', 'Please select a video before creating the stream');
+          const videoSelector = document.querySelector('[onclick="toggleVideoSelector()"]');
+          if (videoSelector) {
+            videoSelector.classList.add('border-red-500');
+            videoSelector.classList.remove('border-gray-600');
+            videoSelector.animate([
+              { transform: 'translateX(0px)' },
+              { transform: 'translateX(-5px)' },
+              { transform: 'translateX(5px)' },
+              { transform: 'translateX(-5px)' },
+              { transform: 'translateX(0px)' }
+            ], {
+              duration: 300,
+              iterations: 1
+            });
+          }
+          return;
+        }
       }
       if (!isStreamKeyValid) {
         showToast('error', 'Please use a different stream key. This one is already in use.');
@@ -2254,7 +2556,9 @@
       }
       const formData = {
         streamTitle: document.getElementById('streamTitle').value,
-        videoId: document.getElementById('selectedVideoId').value,
+        videoId: finalVideoId,
+        videoMode: currentVideoMode,
+        videoIds: currentVideoMode === 'daily_rotation' ? videoIdsList : null,
         rtmpUrl: document.getElementById('rtmpUrl').value,
         streamKey: document.getElementById('streamKey').value,
         bitrate: document.querySelector('select[name="bitrate"]').value,
@@ -2274,7 +2578,7 @@
         }
         formData.scheduleStartTime = scheduleStartTime;
       }
-      formData.isDaily = document.getElementById('isDaily')?.checked || false;
+      formData.isDaily = currentVideoMode === 'daily_rotation' ? true : (document.getElementById('isDaily')?.checked || false);
 
       if (document.getElementById('enableSeparateAudio')?.checked) {
         formData.audioMode = currentAudioMode;
@@ -2657,6 +2961,13 @@
               <span class="text-gray-600 text-[10px]">•</span>
               <span class="text-[10px] text-gray-400 stream-settings-display">${settingsDisplay}</span>
             </div>
+            ${stream.video_mode === 'daily_rotation' ? `
+            <div class="mt-1">
+              <span class="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-blue-900/60 text-blue-300 border border-blue-700/50">
+                <i class="ti ti-calendar-repeat text-[10px]"></i>
+                <span class="truncate max-w-[150px]">Rotasi Video: Hari ${(stream.current_video_index || 0) + 1}/${stream.video_ids ? (typeof stream.video_ids === 'string' ? JSON.parse(stream.video_ids).length : stream.video_ids.length) : 1}</span>
+              </span>
+            </div>` : ''}
             ${stream.audio_mode && stream.audio_mode !== 'none' ? `
             <div class="mt-1">
               <span class="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-purple-900/60 text-purple-300 border border-purple-700/50">
@@ -2767,6 +3078,13 @@
               <span class="truncate">${displayChannel}</span>
             </div>` : ''}
             <div class="text-[11px] text-gray-400 stream-settings-display mt-0.5">${settingsDisplay}</div>
+            ${stream.video_mode === 'daily_rotation' ? `
+            <div class="mt-1">
+              <span class="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-blue-900/60 text-blue-300 border border-blue-700/50" title="Rotasi Video: Hari ${(stream.current_video_index || 0) + 1}">
+                <i class="ti ti-calendar-repeat text-[10px]"></i>
+                <span class="truncate max-w-[200px]">Rotasi Video: Hari ${(stream.current_video_index || 0) + 1}/${stream.video_ids ? (typeof stream.video_ids === 'string' ? JSON.parse(stream.video_ids).length : stream.video_ids.length) : 1}</span>
+              </span>
+            </div>` : ''}
             ${stream.audio_mode && stream.audio_mode !== 'none' ? `
             <div class="mt-1">
               <span class="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-purple-900/60 text-purple-300 border border-purple-700/50" title="Audio: ${escapeHtml(stream.audio_title || stream.audio_mode)}">
@@ -4039,20 +4357,60 @@
         if (editStreamKey) editStreamKey.required = true;
       }
       
-      if (stream.video_id && !isYoutubeStream) {
-        document.getElementById('editSelectedVideoId').value = stream.video_id;
-        const displayName = stream.video_type === 'playlist' 
-          ? (stream.playlist_name || stream.video_title) 
-          : stream.video_title;
-        
-        const videoData = {
-          id: stream.video_id,
-          name: displayName,
-          url: `/stream/${stream.video_id}`,
-          thumbnail: stream.video_thumbnail,
-          type: stream.video_type || 'video'
-        };
-        selectEditVideo(videoData);
+      if (!isYoutubeStream) {
+        if (stream.video_mode === 'daily_rotation') {
+          setEditVideoMode('daily_rotation');
+          loadVideoRotationOptions(false, () => {
+            let vIds = [];
+            try {
+              vIds = typeof stream.video_ids === 'string' ? JSON.parse(stream.video_ids) : (stream.video_ids || []);
+            } catch (e) { vIds = []; }
+            const container = document.getElementById('editMultiVideoList');
+            if (container && Array.isArray(vIds) && vIds.length > 0) {
+              const items = Array.from(container.querySelectorAll('.video-drag-item'));
+              const itemMap = new Map();
+              items.forEach(item => {
+                const cb = item.querySelector('input[type="checkbox"]');
+                if (cb) itemMap.set(cb.value, item);
+              });
+              vIds.forEach(id => {
+                const item = itemMap.get(id);
+                if (item) {
+                  container.appendChild(item);
+                  const cb = item.querySelector('input[type="checkbox"]');
+                  if (cb) cb.checked = true;
+                  itemMap.delete(id);
+                }
+              });
+              itemMap.forEach(item => {
+                container.appendChild(item);
+                const cb = item.querySelector('input[type="checkbox"]');
+                if (cb) cb.checked = false;
+              });
+              if (typeof updateVideoOrderNumbers === 'function') {
+                updateVideoOrderNumbers(container);
+              }
+            }
+            updateEditSelectedVideoCount();
+          });
+        } else {
+          setEditVideoMode('single');
+          if (stream.video_id) {
+            document.getElementById('editSelectedVideoId').value = stream.video_id;
+            const displayName = stream.video_type === 'playlist' 
+              ? (stream.playlist_name || stream.video_title) 
+              : stream.video_title;
+            
+            const videoData = {
+              id: stream.video_id,
+              name: displayName,
+              url: `/stream/${stream.video_id}`,
+              thumbnail: stream.video_thumbnail,
+              type: stream.video_type || 'video'
+            };
+            selectEditVideo(videoData);
+          }
+        }
       }
       document.getElementById('editLoopVideo').checked = stream.loop_video;
       const bitrateSelect = document.getElementById('editBitrate');
@@ -4629,14 +4987,28 @@
             return;
           }
           
-          const videoId = document.getElementById('editSelectedVideoId').value;
-          if (!videoId) {
-            showToast('error', 'Please select a video before updating the stream.');
-            return;
+          let finalVideoId = '';
+          let videoIdsList = [];
+          if (currentEditVideoMode === 'daily_rotation') {
+            const checkedVideoBoxes = Array.from(document.querySelectorAll('#editMultiVideoList input[type="checkbox"]:checked'));
+            if (checkedVideoBoxes.length === 0) {
+              showToast('error', 'Silakan pilih minimal 1 video untuk rotasi harian');
+              return;
+            }
+            videoIdsList = checkedVideoBoxes.map(cb => cb.value);
+            finalVideoId = videoIdsList[0];
+          } else {
+            finalVideoId = document.getElementById('editSelectedVideoId').value;
+            if (!finalVideoId) {
+              showToast('error', 'Please select a video before updating the stream.');
+              return;
+            }
           }
           const formData = {
             streamTitle: document.getElementById('editStreamTitle').value,
-            videoId: videoId,
+            videoId: finalVideoId,
+            videoMode: currentEditVideoMode,
+            videoIds: currentEditVideoMode === 'daily_rotation' ? videoIdsList : null,
             rtmpUrl: document.getElementById('editRtmpUrl').value,
             streamKey: document.getElementById('editStreamKey').value,
             bitrate: document.getElementById('editBitrate').value,
@@ -4656,7 +5028,7 @@
             }
           }
           formData.scheduleStartTime = scheduleStartTime || '';
-          formData.isDaily = document.getElementById('editIsDaily')?.checked || false;
+          formData.isDaily = currentEditVideoMode === 'daily_rotation' ? true : (document.getElementById('editIsDaily')?.checked || false);
 
           if (document.getElementById('editEnableSeparateAudio')?.checked) {
             formData.audioMode = currentEditAudioMode;

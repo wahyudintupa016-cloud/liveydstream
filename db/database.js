@@ -70,6 +70,9 @@ function createTables() {
         audio_id TEXT,
         audio_ids TEXT,
         current_audio_index INTEGER DEFAULT 0,
+        video_mode TEXT DEFAULT 'single',
+        video_ids TEXT,
+        current_video_index INTEGER DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         user_id TEXT,
@@ -253,6 +256,24 @@ function createTables() {
       db.run(`ALTER TABLE streams ADD COLUMN current_audio_index INTEGER DEFAULT 0`, (err) => {
         if (err && !err.message.includes('duplicate column name')) {
           console.error('Error adding current_audio_index column:', err.message);
+        }
+      });
+
+      db.run(`ALTER TABLE streams ADD COLUMN video_mode TEXT DEFAULT 'single'`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+          console.error('Error adding video_mode column:', err.message);
+        }
+      });
+
+      db.run(`ALTER TABLE streams ADD COLUMN video_ids TEXT`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+          console.error('Error adding video_ids column:', err.message);
+        }
+      });
+
+      db.run(`ALTER TABLE streams ADD COLUMN current_video_index INTEGER DEFAULT 0`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+          console.error('Error adding current_video_index column:', err.message);
         }
       });
 

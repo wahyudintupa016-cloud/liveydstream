@@ -273,7 +273,20 @@ async function buildFFmpegArgs(stream) {
     return await buildFFmpegArgsForPlaylist(stream, playlist);
   }
 
-  const video = await Video.findById(stream.video_id);
+  let targetVideoId = stream.video_id;
+  if (stream.video_mode === 'daily_rotation' && stream.video_ids) {
+    try {
+      const vIds = typeof stream.video_ids === 'string' ? JSON.parse(stream.video_ids) : stream.video_ids;
+      if (Array.isArray(vIds) && vIds.length > 0) {
+        const vIdx = (stream.current_video_index || 0) % vIds.length;
+        targetVideoId = vIds[vIdx];
+      }
+    } catch (e) {
+      console.error('Error parsing video_ids for daily rotation:', e);
+    }
+  }
+
+  const video = await Video.findById(targetVideoId);
   if (!video) {
     throw new Error('Video not found');
   }
@@ -674,6 +687,18 @@ async function startStream(streamId, isRetry = false, baseUrl = null) {
                     console.error('Error advancing daily rotation audio:', e);
                   }
                 }
+                if (currentStream.video_mode === 'daily_rotation' && currentStream.video_ids) {
+                  try {
+                    const vIds = typeof currentStream.video_ids === 'string' ? JSON.parse(currentStream.video_ids) : currentStream.video_ids;
+                    if (Array.isArray(vIds) && vIds.length > 0) {
+                      const nextVIdx = ((currentStream.current_video_index || 0) + 1) % vIds.length;
+                      updateData.current_video_index = nextVIdx;
+                      updateData.video_id = vIds[nextVIdx];
+                    }
+                  } catch (e) {
+                    console.error('Error advancing daily rotation video:', e);
+                  }
+                }
                 await Stream.update(streamId, updateData);
                 addStreamLog(streamId, 'Stream rescheduled for tomorrow');
               } else {
@@ -832,6 +857,18 @@ async function stopStream(streamId) {
             }
           } catch (e) {
             console.error('Error advancing daily rotation audio on stop:', e);
+          }
+        }
+        if (stream.video_mode === 'daily_rotation' && stream.video_ids) {
+          try {
+            const vIds = typeof stream.video_ids === 'string' ? JSON.parse(stream.video_ids) : stream.video_ids;
+            if (Array.isArray(vIds) && vIds.length > 0) {
+              const nextVIdx = ((stream.current_video_index || 0) + 1) % vIds.length;
+              updateData.current_video_index = nextVIdx;
+              updateData.video_id = vIds[nextVIdx];
+            }
+          } catch (e) {
+            console.error('Error advancing daily rotation video on stop:', e);
           }
         }
         await Stream.update(streamId, updateData);

@@ -3134,6 +3134,17 @@ app.post('/api/streams', isAuthenticated, [
     }
     
     streamData.is_daily = req.body.isDaily === 'true' || req.body.isDaily === true;
+    streamData.video_mode = req.body.videoMode || 'single';
+    streamData.video_ids = req.body.videoIds ? (typeof req.body.videoIds === 'string' ? req.body.videoIds : JSON.stringify(req.body.videoIds)) : null;
+    streamData.current_video_index = parseInt(req.body.currentVideoIndex) || 0;
+    if (streamData.video_mode === 'daily_rotation' && req.body.videoIds) {
+      try {
+        const vList = typeof req.body.videoIds === 'string' ? JSON.parse(req.body.videoIds) : req.body.videoIds;
+        if (Array.isArray(vList) && vList.length > 0) {
+          streamData.video_id = vList[streamData.current_video_index % vList.length];
+        }
+      } catch (e) {}
+    }
     streamData.audio_mode = req.body.audioMode || 'none';
     streamData.audio_id = req.body.audioId || null;
     streamData.audio_ids = req.body.audioIds ? (typeof req.body.audioIds === 'string' ? req.body.audioIds : JSON.stringify(req.body.audioIds)) : null;
@@ -3665,6 +3676,24 @@ app.put('/api/streams/:id', isAuthenticated, uploadThumbnail.single('thumbnail')
     
     if (req.body.isDaily !== undefined) {
       updateData.is_daily = req.body.isDaily === 'true' || req.body.isDaily === true;
+    }
+    if (req.body.videoMode !== undefined) {
+      updateData.video_mode = req.body.videoMode;
+    }
+    if (req.body.videoIds !== undefined) {
+      updateData.video_ids = req.body.videoIds ? (typeof req.body.videoIds === 'string' ? req.body.videoIds : JSON.stringify(req.body.videoIds)) : null;
+    }
+    if (req.body.currentVideoIndex !== undefined) {
+      updateData.current_video_index = parseInt(req.body.currentVideoIndex) || 0;
+    }
+    if (req.body.videoMode === 'daily_rotation' && req.body.videoIds) {
+      try {
+        const vList = typeof req.body.videoIds === 'string' ? JSON.parse(req.body.videoIds) : req.body.videoIds;
+        if (Array.isArray(vList) && vList.length > 0) {
+          const vIdx = updateData.current_video_index !== undefined ? updateData.current_video_index : (stream.current_video_index || 0);
+          updateData.video_id = vList[vIdx % vList.length];
+        }
+      } catch (e) {}
     }
     if (req.body.audioMode !== undefined) {
       updateData.audio_mode = req.body.audioMode;

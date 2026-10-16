@@ -35,7 +35,10 @@ class Stream {
       audio_mode = 'none',
       audio_id = null,
       audio_ids = null,
-      current_audio_index = 0
+      current_audio_index = 0,
+      video_mode = 'single',
+      video_ids = null,
+      current_video_index = 0
     } = streamData;
     const loop_video_int = loop_video ? 1 : 0;
     const use_advanced_settings_int = use_advanced_settings ? 1 : 0;
@@ -50,14 +53,16 @@ class Stream {
           bitrate, resolution, fps, orientation, loop_video,
           schedule_time, end_time, duration, status, status_updated_at, use_advanced_settings, user_id,
           youtube_broadcast_id, youtube_stream_id, youtube_description, youtube_privacy, youtube_category, youtube_tags, youtube_thumbnail, youtube_channel_id, is_youtube_api, is_daily, channel_name,
-          audio_mode, audio_id, audio_ids, current_audio_index
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          audio_mode, audio_id, audio_ids, current_audio_index,
+          video_mode, video_ids, current_video_index
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           id, title, video_id, rtmp_url, stream_key, platform, platform_icon,
           bitrate, resolution, fps, orientation, loop_video_int,
           schedule_time, end_time, duration, final_status, status_updated_at, use_advanced_settings_int, user_id,
           youtube_broadcast_id, youtube_stream_id, youtube_description, youtube_privacy, youtube_category, youtube_tags, youtube_thumbnail, youtube_channel_id, is_youtube_api_int, is_daily_int, channel_name,
-          audio_mode, audio_id, typeof audio_ids === 'object' ? JSON.stringify(audio_ids) : audio_ids, current_audio_index
+          audio_mode, audio_id, typeof audio_ids === 'object' ? JSON.stringify(audio_ids) : audio_ids, current_audio_index,
+          video_mode, typeof video_ids === 'object' ? JSON.stringify(video_ids) : video_ids, current_video_index
         ],
         function (err) {
           if (err) {

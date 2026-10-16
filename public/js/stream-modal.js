@@ -22,6 +22,7 @@ function openNewStreamModal() {
   loadGalleryVideos();
   updateMinScheduleTimes();
   if (typeof loadAudioOptions === 'function') loadAudioOptions();
+  if (typeof loadVideoRotationOptions === 'function') loadVideoRotationOptions();
 }
 
 function updateMinScheduleTimes() {
@@ -82,6 +83,10 @@ function closeNewStreamModal() {
   const multiAudioCheckboxes = document.querySelectorAll('#multiAudioList input[type="checkbox"]');
   multiAudioCheckboxes.forEach(cb => cb.checked = false);
   if (typeof updateSelectedAudioCount === 'function') updateSelectedAudioCount();
+  if (typeof setVideoMode === 'function') setVideoMode('single');
+  const multiVideoCheckboxes = document.querySelectorAll('#multiVideoList input[type="checkbox"]');
+  multiVideoCheckboxes.forEach(cb => cb.checked = false);
+  if (typeof updateSelectedVideoCount === 'function') updateSelectedVideoCount();
   const desktopVideo = document.getElementById('native-preview-desktop');
   const mobileVideo = document.getElementById('native-preview-mobile');
   if (desktopVideo) { desktopVideo.pause(); desktopVideo.src = ''; }
