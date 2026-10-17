@@ -77,13 +77,23 @@ function getRetryDelay(retryCount) {
   return delay + Math.random() * 1000;
 }
 
+function formatRtmpUrl(rawUrl, streamKey) {
+  let cleanUrl = (rawUrl || '').trim().replace(/\/$/, '');
+  // YouTube RTMPS TLS sessions easily invalidate when multiple streams run concurrently.
+  // Automatically fallback/normalize YouTube RTMPS to standard RTMP (port 1935).
+  if (cleanUrl.startsWith('rtmps://a.rtmp.youtube.com') || cleanUrl.startsWith('rtmps://b.rtmp.youtube.com')) {
+    cleanUrl = cleanUrl.replace('rtmps://', 'rtmp://');
+  }
+  return `${cleanUrl}/${streamKey}`;
+}
+
 async function buildFFmpegArgsForPlaylist(stream, playlist) {
   if (!playlist.videos || playlist.videos.length === 0) {
     throw new Error('Playlist is empty');
   }
 
   const projectRoot = path.resolve(__dirname, '..');
-  const rtmpUrl = `${stream.rtmp_url.replace(/\/$/, '')}/${stream.stream_key}`;
+  const rtmpUrl = formatRtmpUrl(stream.rtmp_url, stream.stream_key);
   const tempDir = path.join(projectRoot, 'temp');
 
   if (!fs.existsSync(tempDir)) {
@@ -299,7 +309,7 @@ async function buildFFmpegArgs(stream) {
     throw new Error(`Video file not found: ${videoPath}`);
   }
 
-  const rtmpUrl = `${stream.rtmp_url.replace(/\/$/, '')}/${stream.stream_key}`;
+  const rtmpUrl = formatRtmpUrl(stream.rtmp_url, stream.stream_key);
   const loopValue = stream.loop_video ? '-1' : '0';
 
   const hasSeparateAudio = stream.audio_mode && stream.audio_mode !== 'none';
