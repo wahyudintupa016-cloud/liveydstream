@@ -3711,13 +3711,23 @@ app.put('/api/streams/:id', isAuthenticated, uploadThumbnail.single('thumbnail')
     if (req.body.scheduleStartTime) {
       const scheduleStartDate = parseLocalDateTime(req.body.scheduleStartTime);
       if (stream.status !== 'live' && scheduleStartDate.getTime() < Date.now() - 30000) {
-        return res.status(400).json({ 
-          success: false, 
-          error: 'Waktu mulai jadwal (Start Stream) tidak boleh di masa lalu. Silakan pilih waktu yang akan datang.' 
-        });
+        if (updateData.is_daily || stream.is_daily) {
+          const now = new Date();
+          scheduleStartDate.setFullYear(now.getFullYear(), now.getMonth(), now.getDate());
+          if (scheduleStartDate.getTime() < Date.now() - 30000) {
+            scheduleStartDate.setDate(scheduleStartDate.getDate() + 1);
+          }
+        } else {
+          return res.status(400).json({ 
+            success: false, 
+            error: 'Waktu mulai jadwal (Start Stream) tidak boleh di masa lalu. Silakan pilih waktu yang akan datang.' 
+          });
+        }
       }
       updateData.schedule_time = scheduleStartDate.toISOString();
-      updateData.status = 'scheduled';
+      if (stream.status !== 'live') {
+        updateData.status = 'scheduled';
+      }
       
       let scheduleEndDate = null;
       if (req.body.scheduleEndTime) {
@@ -3755,7 +3765,9 @@ app.put('/api/streams/:id', isAuthenticated, uploadThumbnail.single('thumbnail')
       }
     } else if ('scheduleStartTime' in req.body && !req.body.scheduleStartTime) {
       updateData.schedule_time = null;
-      updateData.status = 'offline';
+      if (stream.status !== 'live') {
+        updateData.status = 'offline';
+      }
       
       let scheduleEndDate = null;
       if (req.body.scheduleEndTime) {
@@ -3771,6 +3783,9 @@ app.put('/api/streams/:id', isAuthenticated, uploadThumbnail.single('thumbnail')
       
       if (scheduleEndDate) {
         updateData.end_time = scheduleEndDate.toISOString();
+        const durationMs = scheduleEndDate.getTime() - Date.now();
+        const durationMinutes = Math.round(durationMs / 60000);
+        updateData.duration = durationMinutes > 0 ? durationMinutes : null;
       } else if ('scheduleEndTime' in req.body && req.body.scheduleEndTime === '') {
         updateData.end_time = null;
         updateData.duration = null;

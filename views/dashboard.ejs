@@ -3883,6 +3883,7 @@
     let isEditStreamKeyValid = true;
     let originalStreamKey = '';
     let currentEditStreamMode = 'manual';
+    let currentEditStreamStatus = '';
     let editYtTags = [];
     
     function setEditStreamMode(mode) {
@@ -4245,6 +4246,7 @@
     }
     function openEditStreamModal(stream) {
       originalStreamKey = stream.stream_key;
+      currentEditStreamStatus = stream.status || '';
       document.getElementById('editStreamId').value = stream.id;
       
       const isYoutubeStream = stream.is_youtube_api === true || stream.is_youtube_api === 1;
@@ -4449,41 +4451,60 @@
       if (stream.schedule_time && !isYoutubeStream) {
         const scheduleDate = new Date(stream.schedule_time);
         document.getElementById('editScheduleStartTime').value = formatDateTimeLocal(scheduleDate);
+      } else if (stream.start_time && !isYoutubeStream) {
+        const startDate = new Date(stream.start_time);
+        document.getElementById('editScheduleStartTime').value = formatDateTimeLocal(startDate);
       } else {
         document.getElementById('editScheduleStartTime').value = '';
       }
       
       document.getElementById('editIsDaily').checked = !!stream.is_daily;
       
-      if (stream.schedule_time && stream.end_time && !isYoutubeStream) {
-        const scheduleDate = new Date(stream.schedule_time);
-        const endDate = new Date(stream.end_time);
-        const durationMs = endDate - scheduleDate;
-        if (durationMs > 0) {
-            const h = Math.floor(durationMs / 3600000);
-            const m = Math.floor((durationMs % 3600000) / 60000);
-            const s = Math.floor((durationMs % 60000) / 1000);
-            document.getElementById('editDurationHours').value = h > 0 ? h : '';
-            document.getElementById('editDurationMinutes').value = m > 0 ? m : '';
-            document.getElementById('editDurationSeconds').value = s > 0 ? s : '';
-        }
-      } else if (!stream.schedule_time && stream.end_time && !isYoutubeStream) {
-        const startDate = new Date(); // or stream start_time if live
+      let durHours = '';
+      let durMinutes = '';
+      let durSeconds = '';
+
+      const baseStartTimeStr = stream.schedule_time || stream.start_time;
+      if (baseStartTimeStr && stream.end_time && !isYoutubeStream) {
+        const startDate = new Date(baseStartTimeStr);
         const endDate = new Date(stream.end_time);
         const durationMs = endDate - startDate;
         if (durationMs > 0) {
-            const h = Math.floor(durationMs / 3600000);
-            const m = Math.floor((durationMs % 3600000) / 60000);
-            const s = Math.floor((durationMs % 60000) / 1000);
-            document.getElementById('editDurationHours').value = h > 0 ? h : '';
-            document.getElementById('editDurationMinutes').value = m > 0 ? m : '';
-            document.getElementById('editDurationSeconds').value = s > 0 ? s : '';
+          const h = Math.floor(durationMs / 3600000);
+          const m = Math.floor((durationMs % 3600000) / 60000);
+          const s = Math.floor((durationMs % 60000) / 1000);
+          durHours = h > 0 ? h : '';
+          durMinutes = m > 0 ? m : '';
+          durSeconds = s > 0 ? s : '';
         }
-      } else {
-        document.getElementById('editDurationHours').value = '';
-        document.getElementById('editDurationMinutes').value = '';
-        document.getElementById('editDurationSeconds').value = '';
       }
+
+      if (!durHours && !durMinutes && !durSeconds && stream.duration) {
+        const totalMinutes = parseInt(stream.duration) || 0;
+        if (totalMinutes > 0) {
+          const h = Math.floor(totalMinutes / 60);
+          const m = totalMinutes % 60;
+          durHours = h > 0 ? h : '';
+          durMinutes = m > 0 ? m : '';
+          durSeconds = '';
+        }
+      }
+
+      if (!durHours && !durMinutes && !durSeconds && stream.end_time && stream.status === 'live') {
+        const remMs = new Date(stream.end_time).getTime() - Date.now();
+        if (remMs > 0) {
+          const h = Math.floor(remMs / 3600000);
+          const m = Math.floor((remMs % 3600000) / 60000);
+          const s = Math.floor((remMs % 60000) / 1000);
+          durHours = h > 0 ? h : '';
+          durMinutes = m > 0 ? m : '';
+          durSeconds = s > 0 ? s : '';
+        }
+      }
+
+      document.getElementById('editDurationHours').value = durHours;
+      document.getElementById('editDurationMinutes').value = durMinutes;
+      document.getElementById('editDurationSeconds').value = durSeconds;
       const advancedSettingsContent = document.getElementById('editAdvancedSettingsContent');
       const advancedSettingsCheckbox = document.getElementById('editAdvancedSettingsCheckbox');
       if (stream.use_advanced_settings) {
@@ -5019,16 +5040,29 @@
             channelName: document.getElementById('editChannelName')?.value || '',
             useAdvancedSettings: !document.getElementById('editAdvancedSettingsContent').classList.contains('hidden')
           };
-          const scheduleStartTime = document.getElementById('editScheduleStartTime')?.value;
+          const isDaily = currentEditVideoMode === 'daily_rotation' ? true : (document.getElementById('editIsDaily')?.checked || false);
+          let scheduleStartTime = document.getElementById('editScheduleStartTime')?.value;
           if (scheduleStartTime) {
             const startMs = new Date(scheduleStartTime).getTime();
-            if (startMs < Date.now() - 60000) {
-              showToast('error', 'Waktu mulai jadwal (Start Stream) tidak boleh di masa lalu!');
-              return;
+            if (currentEditStreamStatus !== 'live') {
+              if (isDaily && startMs < Date.now() - 60000) {
+                const parsed = new Date(scheduleStartTime);
+                const now = new Date();
+                parsed.setFullYear(now.getFullYear(), now.getMonth(), now.getDate());
+                if (parsed.getTime() < Date.now() - 60000) {
+                  parsed.setDate(parsed.getDate() + 1);
+                }
+                scheduleStartTime = formatDateTimeLocal(parsed);
+                const editStartEl = document.getElementById('editScheduleStartTime');
+                if (editStartEl) editStartEl.value = scheduleStartTime;
+              } else if (!isDaily && startMs < Date.now() - 60000) {
+                showToast('error', 'Waktu mulai jadwal (Start Stream) tidak boleh di masa lalu!');
+                return;
+              }
             }
           }
           formData.scheduleStartTime = scheduleStartTime || '';
-          formData.isDaily = currentEditVideoMode === 'daily_rotation' ? true : (document.getElementById('editIsDaily')?.checked || false);
+          formData.isDaily = isDaily;
 
           if (document.getElementById('editEnableSeparateAudio')?.checked) {
             formData.audioMode = currentEditAudioMode;
