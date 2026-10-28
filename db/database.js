@@ -277,6 +277,12 @@ function createTables() {
         }
       });
 
+      db.run(`ALTER TABLE streams ADD COLUMN anti_fingerprint INTEGER DEFAULT 0`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+          console.error('Error adding anti_fingerprint column:', err.message);
+        }
+      });
+
       db.run(`CREATE TABLE IF NOT EXISTS stream_rotations (
         id TEXT PRIMARY KEY,
         user_id TEXT NOT NULL,

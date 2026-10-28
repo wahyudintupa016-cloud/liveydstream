@@ -87,6 +87,24 @@ function formatRtmpUrl(rawUrl, streamKey) {
   return `${cleanUrl}/${streamKey}`;
 }
 
+function getAudioEncodingArgs(stream, fallbackBitrate = '192k') {
+  if (stream.anti_fingerprint) {
+    // Mode Anti 0-Views: Acak Frekuensi Audio Mikro (pitch shift 0.995 s/d 1.005) persis combiner_prov2.py
+    const afPitch = Number((0.995 + Math.random() * 0.010).toFixed(5));
+    const aTempo = Number((1 / afPitch).toFixed(5));
+    addStreamLog(stream.id, `[Anti-Fingerprint] Mode Anti 0-Views aktif (Frekuensi pitch: ${afPitch}, tempo: ${aTempo})`);
+    return [
+      '-filter:a', `asetrate=44100*${afPitch},aresample=44100,atempo=${aTempo}`,
+      '-c:a', 'aac',
+      '-b:a', fallbackBitrate,
+      '-ar', '44100',
+      '-ac', '2'
+    ];
+  }
+  return null;
+}
+
+
 async function buildFFmpegArgsForPlaylist(stream, playlist) {
   if (!playlist.videos || playlist.videos.length === 0) {
     throw new Error('Playlist is empty');
@@ -126,7 +144,26 @@ async function buildFFmpegArgsForPlaylist(stream, playlist) {
   const hasAudio = playlist.audios && playlist.audios.length > 0;
 
   if (!hasAudio) {
+    const afArgs = getAudioEncodingArgs(stream, '192k');
     if (!stream.use_advanced_settings) {
+      if (afArgs) {
+        return [
+          '-nostdin',
+          '-loglevel', 'warning',
+          '-stats',
+          '-re',
+          '-fflags', '+genpts+igndts+discardcorrupt',
+          '-avoid_negative_ts', 'make_zero',
+          '-f', 'concat',
+          '-safe', '0',
+          '-i', concatFile,
+          '-c:v', 'copy',
+          ...afArgs,
+          '-f', 'flv',
+          '-flvflags', 'no_duration_filesize',
+          rtmpUrl
+        ];
+      }
       return [
         '-nostdin',
         '-loglevel', 'warning',
@@ -206,6 +243,7 @@ async function buildFFmpegArgsForPlaylist(stream, playlist) {
   fs.writeFileSync(audioConcatFile, audioContent);
 
   if (!stream.use_advanced_settings) {
+    const afArgs = getAudioEncodingArgs(stream, '192k');
     return [
       '-nostdin',
       '-loglevel', 'warning',
@@ -222,7 +260,7 @@ async function buildFFmpegArgsForPlaylist(stream, playlist) {
       '-map', '0:v:0',
       '-map', '1:a:0',
       '-c:v', 'copy',
-      '-c:a', 'copy',
+      ...(afArgs || ['-c:a', 'copy']),
       '-f', 'flv',
       '-flvflags', 'no_duration_filesize',
       rtmpUrl
@@ -262,10 +300,12 @@ async function buildFFmpegArgsForPlaylist(stream, playlist) {
     '-sc_threshold', '0',
     '-s', resolution,
     '-r', String(fps),
-    '-c:a', 'aac',
-    '-b:a', '128k',
-    '-ar', '44100',
-    '-ac', '2',
+    ...(afArgs || [
+      '-c:a', 'aac',
+      '-b:a', '128k',
+      '-ar', '44100',
+      '-ac', '2'
+    ]),
     '-f', 'flv',
     '-flvflags', 'no_duration_filesize',
     rtmpUrl
@@ -382,6 +422,7 @@ async function buildFFmpegArgs(stream) {
         : ['-f', 'concat', '-safe', '0', '-i', audioConcatFile];
 
       if (!stream.use_advanced_settings) {
+        const afArgs = getAudioEncodingArgs(stream, '192k');
         return [
           '-nostdin',
           '-loglevel', 'warning',
@@ -395,10 +436,12 @@ async function buildFFmpegArgs(stream) {
           '-map', '0:v:0',
           '-map', '1:a:0',
           '-c:v', 'copy',
-          '-c:a', 'aac',
-          '-b:a', '192k',
-          '-ar', '44100',
-          '-ac', '2',
+          ...(afArgs || [
+            '-c:a', 'aac',
+            '-b:a', '192k',
+            '-ar', '44100',
+            '-ac', '2'
+          ]),
           '-f', 'flv',
           '-flvflags', 'no_duration_filesize',
           '-rw_timeout', '10000000',
@@ -409,6 +452,7 @@ async function buildFFmpegArgs(stream) {
         const bitrate = stream.bitrate || 2500;
         const fps = stream.fps || 30;
 
+        const afArgs = getAudioEncodingArgs(stream, '128k');
         return [
           '-nostdin',
           '-loglevel', 'warning',
@@ -435,10 +479,12 @@ async function buildFFmpegArgs(stream) {
           '-sc_threshold', '0',
           '-s', resolution,
           '-r', String(fps),
-          '-c:a', 'aac',
-          '-b:a', '128k',
-          '-ar', '44100',
-          '-ac', '2',
+          ...(afArgs || [
+            '-c:a', 'aac',
+            '-b:a', '128k',
+            '-ar', '44100',
+            '-ac', '2'
+          ]),
           '-f', 'flv',
           '-flvflags', 'no_duration_filesize',
           '-rw_timeout', '10000000',
@@ -448,7 +494,26 @@ async function buildFFmpegArgs(stream) {
     }
   }
 
+  const afArgs = getAudioEncodingArgs(stream, '192k');
   if (!stream.use_advanced_settings) {
+    if (afArgs) {
+      return [
+        '-nostdin',
+        '-loglevel', 'warning',
+        '-stats',
+        '-re',
+        '-fflags', '+genpts+igndts+discardcorrupt',
+        '-avoid_negative_ts', 'make_zero',
+        '-stream_loop', loopValue,
+        '-i', videoPath,
+        '-c:v', 'copy',
+        ...afArgs,
+        '-f', 'flv',
+        '-flvflags', 'no_duration_filesize',
+        '-rw_timeout', '10000000',
+        rtmpUrl
+      ];
+    }
     return [
       '-nostdin',
       '-loglevel', 'warning',

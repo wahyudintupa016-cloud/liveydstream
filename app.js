@@ -3121,6 +3121,7 @@ app.post('/api/streams', isAuthenticated, [
       loop_video: req.body.loopVideo === 'true' || req.body.loopVideo === true,
       use_advanced_settings: req.body.useAdvancedSettings === 'true' || req.body.useAdvancedSettings === true,
       channel_name: req.body.channelName ? req.body.channelName.trim() : null,
+      anti_fingerprint: req.body.antiFingerprint === 'true' || req.body.antiFingerprint === true,
       user_id: req.session.userId
     };
     const serverTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -3287,6 +3288,7 @@ app.post('/api/streams/youtube', isAuthenticated, uploadThumbnail.single('thumbn
       orientation: 'horizontal',
       loop_video: loopVideo === 'true' || loopVideo === true,
       use_advanced_settings: false,
+      anti_fingerprint: req.body.antiFingerprint === 'true' || req.body.antiFingerprint === true,
       user_id: req.session.userId,
       youtube_broadcast_id: null,
       youtube_stream_id: null,
@@ -3453,6 +3455,9 @@ app.put('/api/streams/:id', isAuthenticated, uploadThumbnail.single('thumbnail')
       if (req.body.tags !== undefined) updateData.youtube_tags = req.body.tags;
       if (req.body.loopVideo !== undefined) {
         updateData.loop_video = req.body.loopVideo === 'true' || req.body.loopVideo === true;
+      }
+      if (req.body.antiFingerprint !== undefined) {
+        updateData.anti_fingerprint = req.body.antiFingerprint === 'true' || req.body.antiFingerprint === true;
       }
       
       if (req.body.scheduleStartTime) {
@@ -3663,6 +3668,9 @@ app.put('/api/streams/:id', isAuthenticated, uploadThumbnail.single('thumbnail')
     }
     if (req.body.channelName !== undefined) {
       updateData.channel_name = req.body.channelName ? req.body.channelName.trim() : null;
+    }
+    if (req.body.antiFingerprint !== undefined) {
+      updateData.anti_fingerprint = req.body.antiFingerprint === 'true' || req.body.antiFingerprint === true;
     }
     const serverTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     

@@ -38,12 +38,14 @@ class Stream {
       current_audio_index = 0,
       video_mode = 'single',
       video_ids = null,
-      current_video_index = 0
+      current_video_index = 0,
+      anti_fingerprint = false
     } = streamData;
     const loop_video_int = loop_video ? 1 : 0;
     const use_advanced_settings_int = use_advanced_settings ? 1 : 0;
     const is_youtube_api_int = is_youtube_api ? 1 : 0;
     const is_daily_int = is_daily ? 1 : 0;
+    const anti_fingerprint_int = anti_fingerprint ? 1 : 0;
     const final_status = status || (schedule_time ? 'scheduled' : 'offline');
     const status_updated_at = new Date().toISOString();
     return new Promise((resolve, reject) => {
@@ -54,15 +56,15 @@ class Stream {
           schedule_time, end_time, duration, status, status_updated_at, use_advanced_settings, user_id,
           youtube_broadcast_id, youtube_stream_id, youtube_description, youtube_privacy, youtube_category, youtube_tags, youtube_thumbnail, youtube_channel_id, is_youtube_api, is_daily, channel_name,
           audio_mode, audio_id, audio_ids, current_audio_index,
-          video_mode, video_ids, current_video_index
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          video_mode, video_ids, current_video_index, anti_fingerprint
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           id, title, video_id, rtmp_url, stream_key, platform, platform_icon,
           bitrate, resolution, fps, orientation, loop_video_int,
           schedule_time, end_time, duration, final_status, status_updated_at, use_advanced_settings_int, user_id,
           youtube_broadcast_id, youtube_stream_id, youtube_description, youtube_privacy, youtube_category, youtube_tags, youtube_thumbnail, youtube_channel_id, is_youtube_api_int, is_daily_int, channel_name,
           audio_mode, audio_id, typeof audio_ids === 'object' ? JSON.stringify(audio_ids) : audio_ids, current_audio_index,
-          video_mode, typeof video_ids === 'object' ? JSON.stringify(video_ids) : video_ids, current_video_index
+          video_mode, typeof video_ids === 'object' ? JSON.stringify(video_ids) : video_ids, current_video_index, anti_fingerprint_int
         ],
         function (err) {
           if (err) {
@@ -86,6 +88,7 @@ class Stream {
           row.use_advanced_settings = row.use_advanced_settings === 1;
           row.is_youtube_api = row.is_youtube_api === 1;
           row.is_daily = row.is_daily === 1;
+          row.anti_fingerprint = row.anti_fingerprint === 1;
         }
         resolve(row);
       });
@@ -158,6 +161,7 @@ class Stream {
             row.use_advanced_settings = row.use_advanced_settings === 1;
             row.is_youtube_api = row.is_youtube_api === 1;
           row.is_daily = row.is_daily === 1;
+            row.anti_fingerprint = row.anti_fingerprint === 1;
           });
         }
         resolve(rows || []);
@@ -264,7 +268,7 @@ class Stream {
     const fields = [];
     const values = [];
     Object.entries(streamData).forEach(([key, value]) => {
-      if ((key === 'loop_video' || key === 'is_daily') && typeof value === 'boolean') {
+      if ((key === 'loop_video' || key === 'is_daily' || key === 'anti_fingerprint') && typeof value === 'boolean') {
         fields.push(`${key} = ?`);
         values.push(value ? 1 : 0);
       } else {
