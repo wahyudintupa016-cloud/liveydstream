@@ -73,6 +73,8 @@ function createTables() {
         video_mode TEXT DEFAULT 'single',
         video_ids TEXT,
         current_video_index INTEGER DEFAULT 0,
+        anti_fingerprint INTEGER DEFAULT 0,
+        spoof_obs INTEGER DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         user_id TEXT,
@@ -280,6 +282,12 @@ function createTables() {
       db.run(`ALTER TABLE streams ADD COLUMN anti_fingerprint INTEGER DEFAULT 0`, (err) => {
         if (err && !err.message.includes('duplicate column name')) {
           console.error('Error adding anti_fingerprint column:', err.message);
+        }
+      });
+
+      db.run(`ALTER TABLE streams ADD COLUMN spoof_obs INTEGER DEFAULT 0`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+          console.error('Error adding spoof_obs column:', err.message);
         }
       });
 

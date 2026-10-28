@@ -87,6 +87,18 @@ function formatRtmpUrl(rawUrl, streamKey) {
   return `${cleanUrl}/${streamKey}`;
 }
 
+function getObsSpoofMetadataArgs(stream) {
+  if (stream.spoof_obs) {
+    addStreamLog(stream.id, '[Metadata] Mode OBS Studio 30.1.2 Spoofing aktif');
+    return [
+      '-metadata', 'encoder=OBS Studio 30.1.2 (64-bit)',
+      '-metadata:s:v:0', 'handler_name=VideoHandler',
+      '-metadata:s:a:0', 'handler_name=SoundHandler'
+    ];
+  }
+  return [];
+}
+
 function getAudioEncodingArgs(stream, fallbackBitrate = '192k') {
   if (stream.anti_fingerprint) {
     // Mode Anti 0-Views: Acak Frekuensi Audio Mikro (pitch shift 0.995 s/d 1.005) persis combiner_prov2.py
@@ -159,8 +171,9 @@ async function buildFFmpegArgsForPlaylist(stream, playlist) {
           '-i', concatFile,
           '-c:v', 'copy',
           ...afArgs,
-          '-f', 'flv',
-          '-flvflags', 'no_duration_filesize',
+          ...getObsSpoofMetadataArgs(stream),
+      '-f', 'flv',
+      '-flvflags', 'no_duration_filesize',
           rtmpUrl
         ];
       }
@@ -177,8 +190,9 @@ async function buildFFmpegArgsForPlaylist(stream, playlist) {
         '-c:v', 'copy',
         '-c:a', 'copy',
         '-bsf:a', 'aac_adtstoasc',
-        '-f', 'flv',
-        '-flvflags', 'no_duration_filesize',
+        ...getObsSpoofMetadataArgs(stream),
+      '-f', 'flv',
+      '-flvflags', 'no_duration_filesize',
         rtmpUrl
       ];
     }
@@ -215,6 +229,7 @@ async function buildFFmpegArgsForPlaylist(stream, playlist) {
       '-b:a', '128k',
       '-ar', '44100',
       '-ac', '2',
+      ...getObsSpoofMetadataArgs(stream),
       '-f', 'flv',
       '-flvflags', 'no_duration_filesize',
       rtmpUrl
@@ -261,6 +276,7 @@ async function buildFFmpegArgsForPlaylist(stream, playlist) {
       '-map', '1:a:0',
       '-c:v', 'copy',
       ...(afArgs || ['-c:a', 'copy']),
+      ...getObsSpoofMetadataArgs(stream),
       '-f', 'flv',
       '-flvflags', 'no_duration_filesize',
       rtmpUrl
@@ -306,8 +322,9 @@ async function buildFFmpegArgsForPlaylist(stream, playlist) {
       '-ar', '44100',
       '-ac', '2'
     ]),
-    '-f', 'flv',
-    '-flvflags', 'no_duration_filesize',
+    ...getObsSpoofMetadataArgs(stream),
+      '-f', 'flv',
+      '-flvflags', 'no_duration_filesize',
     rtmpUrl
   ];
 }
@@ -442,8 +459,9 @@ async function buildFFmpegArgs(stream) {
             '-ar', '44100',
             '-ac', '2'
           ]),
-          '-f', 'flv',
-          '-flvflags', 'no_duration_filesize',
+          ...getObsSpoofMetadataArgs(stream),
+      '-f', 'flv',
+      '-flvflags', 'no_duration_filesize',
           '-rw_timeout', '10000000',
           rtmpUrl
         ];
@@ -485,8 +503,9 @@ async function buildFFmpegArgs(stream) {
             '-ar', '44100',
             '-ac', '2'
           ]),
-          '-f', 'flv',
-          '-flvflags', 'no_duration_filesize',
+          ...getObsSpoofMetadataArgs(stream),
+      '-f', 'flv',
+      '-flvflags', 'no_duration_filesize',
           '-rw_timeout', '10000000',
           rtmpUrl
         ];
@@ -508,8 +527,9 @@ async function buildFFmpegArgs(stream) {
         '-i', videoPath,
         '-c:v', 'copy',
         ...afArgs,
-        '-f', 'flv',
-        '-flvflags', 'no_duration_filesize',
+        ...getObsSpoofMetadataArgs(stream),
+      '-f', 'flv',
+      '-flvflags', 'no_duration_filesize',
         '-rw_timeout', '10000000',
         rtmpUrl
       ];
@@ -526,6 +546,7 @@ async function buildFFmpegArgs(stream) {
       '-c:v', 'copy',
       '-c:a', 'copy',
       '-bsf:a', 'aac_adtstoasc',
+      ...getObsSpoofMetadataArgs(stream),
       '-f', 'flv',
       '-flvflags', 'no_duration_filesize',
       '-rw_timeout', '10000000',
@@ -564,8 +585,9 @@ async function buildFFmpegArgs(stream) {
     '-b:a', '128k',
     '-ar', '44100',
     '-ac', '2',
-    '-f', 'flv',
-    '-flvflags', 'no_duration_filesize',
+    ...getObsSpoofMetadataArgs(stream),
+      '-f', 'flv',
+      '-flvflags', 'no_duration_filesize',
     '-rw_timeout', '10000000',
     rtmpUrl
   ];

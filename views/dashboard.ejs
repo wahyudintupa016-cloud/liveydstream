@@ -407,7 +407,7 @@
                   Server time: loading...
                 </span>
               </div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-1">
                 <div class="h-[44px] flex items-center justify-between bg-dark-700/60 px-3 rounded-lg border border-gray-700">
                   <label class="text-xs sm:text-sm text-gray-300 font-medium">Loop Video</label>
                   <label class="relative inline-flex items-center cursor-pointer">
@@ -443,6 +443,17 @@
                   <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" id="antiFingerprint" name="antiFingerprint" class="sr-only peer">
                     <div class="w-10 h-5 bg-dark-600 rounded-full peer peer-checked:bg-indigo-600"></div>
+                    <div class="absolute left-[2px] top-[2px] w-4 h-4 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
+                  </label>
+                </div>
+                <div class="h-[44px] flex items-center justify-between bg-dark-700/60 px-3 rounded-lg border border-emerald-700/70" title="Kirim metadata 'OBS Studio 30.1.2 (64-bit)' pada stream RTMP/FLV agar stream terdeteksi seperti siaran OBS asli">
+                  <div class="flex items-center gap-1.5">
+                    <i class="ti ti-brand-youtube text-emerald-400"></i>
+                    <label class="text-xs sm:text-sm text-emerald-200 font-medium">Tag OBS</label>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="spoofObs" name="spoofObs" class="sr-only peer">
+                    <div class="w-10 h-5 bg-dark-600 rounded-full peer peer-checked:bg-emerald-600"></div>
                     <div class="absolute left-[2px] top-[2px] w-4 h-4 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
                   </label>
                 </div>
@@ -773,6 +784,18 @@
                     </label>
                   </div>
 
+                  <div class="h-[42px] flex items-center justify-between pt-1 border-t border-gray-700/50" title="Kirim metadata 'OBS Studio 30.1.2 (64-bit)' pada stream RTMP/FLV agar stream terdeteksi seperti siaran OBS asli">
+                    <div class="flex items-center gap-2">
+                      <i class="ti ti-brand-youtube text-emerald-400"></i>
+                      <label class="text-sm text-emerald-200">Metadata Spoofing (Tag OBS)</label>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" id="ytSpoofObs" class="sr-only peer">
+                      <div class="w-11 h-6 bg-dark-700 rounded-full peer peer-checked:bg-emerald-600"></div>
+                      <div class="absolute left-[2px] top-[2px] w-5 h-5 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
+                    </label>
+                  </div>
+
                   <div id="ytScheduleSettings" class="hidden space-y-4">
                     <div>
                       <label class="text-xs text-gray-400 block mb-1">Start Time</label>
@@ -1008,7 +1031,7 @@
                   Server time: loading...
                 </span>
               </div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-1">
                 <div class="h-[44px] flex items-center justify-between bg-dark-700/60 px-3 rounded-lg border border-gray-700">
                   <label class="text-xs sm:text-sm text-gray-300 font-medium">Loop Video</label>
                   <label class="relative inline-flex items-center cursor-pointer">
@@ -1044,6 +1067,17 @@
                   <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" id="editAntiFingerprint" name="antiFingerprint" class="sr-only peer">
                     <div class="w-10 h-5 bg-dark-600 rounded-full peer peer-checked:bg-indigo-600"></div>
+                    <div class="absolute left-[2px] top-[2px] w-4 h-4 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
+                  </label>
+                </div>
+                <div class="h-[44px] flex items-center justify-between bg-dark-700/60 px-3 rounded-lg border border-emerald-700/70" title="Kirim metadata 'OBS Studio 30.1.2 (64-bit)' pada stream RTMP/FLV agar stream terdeteksi seperti siaran OBS asli">
+                  <div class="flex items-center gap-1.5">
+                    <i class="ti ti-brand-youtube text-emerald-400"></i>
+                    <label class="text-xs sm:text-sm text-emerald-200 font-medium">Tag OBS</label>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="editSpoofObs" name="spoofObs" class="sr-only peer">
+                    <div class="w-10 h-5 bg-dark-600 rounded-full peer peer-checked:bg-emerald-600"></div>
                     <div class="absolute left-[2px] top-[2px] w-4 h-4 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
                   </label>
                 </div>
@@ -1348,6 +1382,18 @@
                     <label class="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" id="editYtAntiFingerprint" class="sr-only peer">
                       <div class="w-11 h-6 bg-dark-700 rounded-full peer peer-checked:bg-indigo-600"></div>
+                      <div class="absolute left-[2px] top-[2px] w-5 h-5 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
+                    </label>
+                  </div>
+
+                  <div class="h-[42px] flex items-center justify-between pt-1 border-t border-gray-700/50" title="Kirim metadata 'OBS Studio 30.1.2 (64-bit)' pada stream RTMP/FLV agar stream terdeteksi seperti siaran OBS asli">
+                    <div class="flex items-center gap-2">
+                      <i class="ti ti-brand-youtube text-emerald-400"></i>
+                      <label class="text-sm text-emerald-200">Metadata Spoofing (Tag OBS)</label>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" id="editYtSpoofObs" class="sr-only peer">
+                      <div class="w-11 h-6 bg-dark-700 rounded-full peer peer-checked:bg-emerald-600"></div>
                       <div class="absolute left-[2px] top-[2px] w-5 h-5 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
                     </label>
                   </div>
@@ -2463,7 +2509,8 @@
           tags: document.getElementById('ytTags').value,
           loopVideo: true,
           ytChannelId: document.getElementById('ytSelectedChannelId')?.value || '',
-          antiFingerprint: document.getElementById('ytAntiFingerprint')?.checked || false
+          antiFingerprint: document.getElementById('ytAntiFingerprint')?.checked || false,
+          spoofObs: document.getElementById('ytSpoofObs')?.checked || false
         };
         
         const enableSchedule = document.getElementById('ytEnableSchedule').checked;
@@ -2615,7 +2662,8 @@
         resolution: document.getElementById('currentResolution').textContent.split(' ')[0],
         channelName: document.getElementById('channelName')?.value || '',
         useAdvancedSettings: !document.getElementById('advancedSettingsContent').classList.contains('hidden'),
-        antiFingerprint: document.getElementById('antiFingerprint')?.checked || false
+        antiFingerprint: document.getElementById('antiFingerprint')?.checked || false,
+        spoofObs: document.getElementById('spoofObs')?.checked || false
       };
       const scheduleStartTime = document.getElementById('scheduleStartTime')?.value;
       if (scheduleStartTime) {
@@ -4465,6 +4513,8 @@
       document.getElementById('editLoopVideo').checked = stream.loop_video;
       if (document.getElementById('editAntiFingerprint')) document.getElementById('editAntiFingerprint').checked = !!stream.anti_fingerprint;
       if (document.getElementById('editYtAntiFingerprint')) document.getElementById('editYtAntiFingerprint').checked = !!stream.anti_fingerprint;
+      if (document.getElementById('editSpoofObs')) document.getElementById('editSpoofObs').checked = !!stream.spoof_obs;
+      if (document.getElementById('editYtSpoofObs')) document.getElementById('editYtSpoofObs').checked = !!stream.spoof_obs;
       const bitrateSelect = document.getElementById('editBitrate');
       for (let i = 0; i < bitrateSelect.options.length; i++) {
         if (bitrateSelect.options[i].value == stream.bitrate) {
@@ -4953,7 +5003,8 @@
               tags: document.getElementById('editYtTags').value,
               loopVideo: true,
               ytChannelId: document.getElementById('editYtSelectedChannelId')?.value || '',
-            antiFingerprint: document.getElementById('editYtAntiFingerprint')?.checked || false
+            antiFingerprint: document.getElementById('editYtAntiFingerprint')?.checked || false,
+            spoofObs: document.getElementById('editYtSpoofObs')?.checked || false
             };
             
             const enableSchedule = document.getElementById('editYtEnableSchedule').checked;
@@ -5090,7 +5141,8 @@
             resolution: document.getElementById('editCurrentResolution').textContent,
             channelName: document.getElementById('editChannelName')?.value || '',
             useAdvancedSettings: !document.getElementById('editAdvancedSettingsContent').classList.contains('hidden'),
-            antiFingerprint: document.getElementById('editAntiFingerprint')?.checked || false
+            antiFingerprint: document.getElementById('editAntiFingerprint')?.checked || false,
+            spoofObs: document.getElementById('editSpoofObs')?.checked || false
           };
           const isDaily = currentEditVideoMode === 'daily_rotation' ? true : (document.getElementById('editIsDaily')?.checked || false);
           let scheduleStartTime = document.getElementById('editScheduleStartTime')?.value;
