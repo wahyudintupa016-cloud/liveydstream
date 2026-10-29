@@ -383,18 +383,18 @@
               </div>
               <div class="hidden lg:block">
                 <div class="overflow-hidden h-full">
-                  <div class="aspect-video rounded-lg bg-dark-900">
-                    <div id="videoPreview" class="hidden w-full h-full relative group">
+                  <div class="aspect-video rounded-lg bg-dark-900 relative overflow-hidden">
+                    <div id="videoPreview" class="hidden w-full h-full">
                       <video id="native-preview-desktop"
                         class="native-video-player rounded-lg w-full h-full" controls preload="metadata">
                         <source src="" type="video/mp4">
                         Your browser does not support the video tag.
                       </video>
-                      <!-- Live Realtime Clock Preview Badge -->
-                      <div id="clockPreviewOverlay" class="hidden pointer-events-none absolute z-10 font-mono font-bold select-none transition-all"
-                        style="background: rgba(0,0,0,0.5); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2);">
-                        Elapsed: 00:00:00
-                      </div>
+                    </div>
+                    <!-- Live Realtime Clock Preview Badge (Always on top) -->
+                    <div id="clockPreviewOverlay" class="hidden pointer-events-none absolute z-30 font-mono font-bold select-none shadow-lg tracking-wider"
+                      style="background: rgba(0,0,0,0.7); padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); text-shadow: 1px 1px 2px black;">
+                      Elapsed: 00:00:00
                     </div>
                     <div id="emptyPreview" class="h-full flex flex-col items-center justify-center">
                       <i class="ti ti-video text-4xl text-gray-600 mb-2"></i>
@@ -1125,18 +1125,18 @@
               </div>
               <div class="hidden lg:block">
                 <div class="overflow-hidden h-full">
-                  <div class="aspect-video rounded-lg bg-dark-900">
-                    <div id="editVideoPreview" class="hidden w-full h-full relative group">
+                  <div class="aspect-video rounded-lg bg-dark-900 relative overflow-hidden">
+                    <div id="editVideoPreview" class="hidden w-full h-full">
                       <video id="edit-native-preview-desktop"
                         class="native-video-player rounded-lg w-full h-full" controls preload="metadata">
                         <source src="" type="video/mp4">
                         Your browser does not support the video tag.
                       </video>
-                      <!-- Live Realtime Clock Preview Badge (Edit) -->
-                      <div id="editClockPreviewOverlay" class="hidden pointer-events-none absolute z-10 font-mono font-bold select-none transition-all"
-                        style="background: rgba(0,0,0,0.5); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2);">
-                        Elapsed: 00:00:00
-                      </div>
+                    </div>
+                    <!-- Live Realtime Clock Preview Badge Edit (Always on top) -->
+                    <div id="editClockPreviewOverlay" class="hidden pointer-events-none absolute z-30 font-mono font-bold select-none shadow-lg tracking-wider"
+                      style="background: rgba(0,0,0,0.7); padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); text-shadow: 1px 1px 2px black;">
+                      Elapsed: 00:00:00
                     </div>
                     <div id="editEmptyPreview" class="h-full flex flex-col items-center justify-center">
                       <i class="ti ti-video text-4xl text-gray-600 mb-2"></i>
