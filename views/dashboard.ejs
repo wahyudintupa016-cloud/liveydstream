@@ -384,12 +384,17 @@
               <div class="hidden lg:block">
                 <div class="overflow-hidden h-full">
                   <div class="aspect-video rounded-lg bg-dark-900">
-                    <div id="videoPreview" class="hidden w-full h-full">
+                    <div id="videoPreview" class="hidden w-full h-full relative group">
                       <video id="native-preview-desktop"
-                        class="native-video-player rounded-lg" controls preload="metadata">
+                        class="native-video-player rounded-lg w-full h-full" controls preload="metadata">
                         <source src="" type="video/mp4">
                         Your browser does not support the video tag.
                       </video>
+                      <!-- Live Realtime Clock Preview Badge -->
+                      <div id="clockPreviewOverlay" class="hidden pointer-events-none absolute z-10 font-mono font-bold select-none transition-all"
+                        style="background: rgba(0,0,0,0.5); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2);">
+                        Elapsed: 00:00:00
+                      </div>
                     </div>
                     <div id="emptyPreview" class="h-full flex flex-col items-center justify-center">
                       <i class="ti ti-video text-4xl text-gray-600 mb-2"></i>
@@ -487,6 +492,7 @@
                       <select id="clockColorMode" name="clockColorMode"
                         class="w-full h-8 px-2 bg-dark-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:border-yellow-500">
                         <option value="static">Statik (tetap)</option>
+                        <option value="daily">Berganti warna tiap hari (Daily)</option>
                         <option value="random">Acak tiap detik</option>
                       </select>
                     </div>
@@ -626,7 +632,7 @@
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <div>
                   <label class="text-xs text-gray-400 block mb-1">Start Stream</label>
-                  <input type="datetime-local" id="scheduleStartTime" name="scheduleStartTime"
+                  <input type="datetime-local" step="1" id="scheduleStartTime" name="scheduleStartTime"
                     class="w-full h-[42px] px-4 bg-dark-700 border border-gray-600 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary text-sm [color-scheme:dark]">
                 </div>
                 <div>
@@ -911,7 +917,7 @@
                   <div id="ytScheduleSettings" class="hidden space-y-4">
                     <div>
                       <label class="text-xs text-gray-400 block mb-1">Start Time</label>
-                      <input type="datetime-local" id="ytScheduleStart" name="ytScheduleStart" class="w-full h-[42px] px-4 bg-dark-700 border border-gray-600 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary text-sm [color-scheme:dark]">
+                      <input type="datetime-local" step="1" id="ytScheduleStart" name="ytScheduleStart" class="w-full h-[42px] px-4 bg-dark-700 border border-gray-600 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary text-sm [color-scheme:dark]">
                     </div>
                     <div>
                       <label class="text-xs text-gray-400 mb-1 flex items-center">
@@ -1120,12 +1126,17 @@
               <div class="hidden lg:block">
                 <div class="overflow-hidden h-full">
                   <div class="aspect-video rounded-lg bg-dark-900">
-                    <div id="editVideoPreview" class="hidden w-full h-full">
+                    <div id="editVideoPreview" class="hidden w-full h-full relative group">
                       <video id="edit-native-preview-desktop"
-                        class="native-video-player rounded-lg" controls preload="metadata">
+                        class="native-video-player rounded-lg w-full h-full" controls preload="metadata">
                         <source src="" type="video/mp4">
                         Your browser does not support the video tag.
                       </video>
+                      <!-- Live Realtime Clock Preview Badge (Edit) -->
+                      <div id="editClockPreviewOverlay" class="hidden pointer-events-none absolute z-10 font-mono font-bold select-none transition-all"
+                        style="background: rgba(0,0,0,0.5); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2);">
+                        Elapsed: 00:00:00
+                      </div>
                     </div>
                     <div id="editEmptyPreview" class="h-full flex flex-col items-center justify-center">
                       <i class="ti ti-video text-4xl text-gray-600 mb-2"></i>
@@ -1193,6 +1204,118 @@
                     <div class="absolute left-[2px] top-[2px] w-4 h-4 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
                   </label>
                 </div>
+
+                <!-- ======= EDIT: REALTIME CLOCK ======= -->
+                <div class="h-[44px] flex items-center justify-between bg-dark-700/60 px-3 rounded-lg border border-yellow-700/70" title="Overlay jam digital (elapsed time) di pojok video">
+                  <div class="flex items-center gap-1.5">
+                    <i class="ti ti-clock text-yellow-400"></i>
+                    <label class="text-xs sm:text-sm text-yellow-200 font-medium">Realtime Clock</label>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="editClockEnabled" name="clockEnabled" class="sr-only peer" onchange="toggleEditClockOptions(this.checked)">
+                    <div class="w-10 h-5 bg-dark-600 rounded-full peer peer-checked:bg-yellow-500"></div>
+                    <div class="absolute left-[2px] top-[2px] w-4 h-4 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
+                  </label>
+                </div>
+                <!-- Edit Clock Options Panel -->
+                <div id="editClockOptionsPanel" class="hidden space-y-2 bg-dark-900/80 p-3 rounded-lg border border-yellow-800/50 mt-1">
+                  <div class="grid grid-cols-2 gap-2">
+                    <div>
+                      <label class="text-[11px] text-gray-400 block mb-1">Warna Teks (hex)</label>
+                      <div class="flex gap-1 items-center">
+                        <input type="color" id="editClockColorPicker" value="#FFFFFF" onchange="document.getElementById('editClockColor').value=this.value; updateClockPreview(true);" class="w-8 h-8 rounded cursor-pointer border-0 bg-transparent">
+                        <input type="text" id="editClockColor" name="clockColor" value="#FFFFFF" placeholder="#FFFFFF"
+                          class="flex-1 h-8 px-2 bg-dark-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:border-yellow-500"
+                          oninput="document.getElementById('editClockColorPicker').value=this.value; updateClockPreview(true);">
+                      </div>
+                    </div>
+                    <div>
+                      <label class="text-[11px] text-gray-400 block mb-1">Mode Warna</label>
+                      <select id="editClockColorMode" name="clockColorMode" onchange="updateClockPreview(true);"
+                        class="w-full h-8 px-2 bg-dark-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:border-yellow-500">
+                        <option value="static">Statik (tetap)</option>
+                        <option value="daily">Berganti warna tiap hari (Daily)</option>
+                        <option value="random">Acak tiap detik</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-3 gap-2">
+                    <div>
+                      <label class="text-[11px] text-gray-400 block mb-1">Ukuran Font (px)</label>
+                      <input type="number" id="editClockSize" name="clockSize" value="28" min="10" max="72" oninput="updateClockPreview(true);"
+                        class="w-full h-8 px-2 bg-dark-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:border-yellow-500">
+                    </div>
+                    <div>
+                      <label class="text-[11px] text-gray-400 block mb-1">Posisi X (px)</label>
+                      <input type="number" id="editClockX" name="clockX" value="10" min="0" oninput="updateClockPreview(true);"
+                        class="w-full h-8 px-2 bg-dark-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:border-yellow-500">
+                    </div>
+                    <div>
+                      <label class="text-[11px] text-gray-400 block mb-1">Posisi Y (px)</label>
+                      <input type="number" id="editClockY" name="clockY" value="10" min="0" oninput="updateClockPreview(true);"
+                        class="w-full h-8 px-2 bg-dark-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:border-yellow-500">
+                    </div>
+                  </div>
+                  <p class="text-[10px] text-yellow-300/70"><i class="ti ti-info-circle mr-1"></i>Menampilkan <b>elapsed time</b> (menit:detik). Posisi & warna dapat dilihat langsung di kotak preview video di samping!</p>
+                </div>
+
+                <!-- ======= EDIT: DURATION JITTER ======= -->
+                <div class="h-[44px] flex items-center justify-between bg-dark-700/60 px-3 rounded-lg border border-orange-700/70" title="Variasi durasi live secara acak agar durasi tidak selalu identik">
+                  <div class="flex items-center gap-1.5">
+                    <i class="ti ti-clock-play text-orange-400"></i>
+                    <label class="text-xs sm:text-sm text-orange-200 font-medium">Duration Jitter</label>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="editDurationJitterEnabled" name="durationJitterEnabled" class="sr-only peer" onchange="toggleEditDurationJitter(this.checked)">
+                    <div class="w-10 h-5 bg-dark-600 rounded-full peer peer-checked:bg-orange-500"></div>
+                    <div class="absolute left-[2px] top-[2px] w-4 h-4 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
+                  </label>
+                </div>
+                <!-- Edit Duration Jitter Panel -->
+                <div id="editDurationJitterPanel" class="hidden space-y-2 bg-dark-900/80 p-3 rounded-lg border border-orange-800/50 mt-1">
+                  <div class="grid grid-cols-2 gap-2">
+                    <div>
+                      <label class="text-[11px] text-gray-400 block mb-1">Min Jitter (menit)</label>
+                      <input type="number" id="editDurationJitterMin" name="durationJitterMin" value="-7" min="-60" max="0"
+                        class="w-full h-8 px-2 bg-dark-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:border-orange-500" placeholder="-7">
+                    </div>
+                    <div>
+                      <label class="text-[11px] text-gray-400 block mb-1">Max Jitter (menit)</label>
+                      <input type="number" id="editDurationJitterMax" name="durationJitterMax" value="7" min="0" max="60"
+                        class="w-full h-8 px-2 bg-dark-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:border-orange-500" placeholder="7">
+                    </div>
+                  </div>
+                  <p class="text-[10px] text-orange-300/70"><i class="ti ti-info-circle mr-1"></i>Durasi live berubah acak antara <b>Durasi+Min</b> s.d. <b>Durasi+Max</b> menit. Rekomendasi: <b>-7 hingga +7</b>.</p>
+                </div>
+
+                <!-- ======= EDIT: SCHEDULER JITTER ======= -->
+                <div class="h-[44px] flex items-center justify-between bg-dark-700/60 px-3 rounded-lg border border-cyan-700/70" title="Variasi waktu mulai secara acak agar jadwal tidak terprediksi seperti cron-job">
+                  <div class="flex items-center gap-1.5">
+                    <i class="ti ti-calendar-time text-cyan-400"></i>
+                    <label class="text-xs sm:text-sm text-cyan-200 font-medium">Scheduler Jitter</label>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="editSchedulerJitterEnabled" name="schedulerJitterEnabled" class="sr-only peer" onchange="toggleEditSchedulerJitter(this.checked)">
+                    <div class="w-10 h-5 bg-dark-600 rounded-full peer peer-checked:bg-cyan-500"></div>
+                    <div class="absolute left-[2px] top-[2px] w-4 h-4 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
+                  </label>
+                </div>
+                <!-- Edit Scheduler Jitter Panel -->
+                <div id="editSchedulerJitterPanel" class="hidden space-y-2 bg-dark-900/80 p-3 rounded-lg border border-cyan-800/50 mt-1">
+                  <div class="grid grid-cols-2 gap-2">
+                    <div>
+                      <label class="text-[11px] text-gray-400 block mb-1">Min Jitter (menit)</label>
+                      <input type="number" id="editSchedulerJitterMin" name="schedulerJitterMin" value="2" min="0" max="60"
+                        class="w-full h-8 px-2 bg-dark-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:border-cyan-500" placeholder="2">
+                    </div>
+                    <div>
+                      <label class="text-[11px] text-gray-400 block mb-1">Max Jitter (menit)</label>
+                      <input type="number" id="editSchedulerJitterMax" name="schedulerJitterMax" value="8" min="0" max="60"
+                        class="w-full h-8 px-2 bg-dark-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:border-cyan-500" placeholder="8">
+                    </div>
+                  </div>
+                  <p class="text-[10px] text-cyan-300/70"><i class="ti ti-info-circle mr-1"></i>Waktu mulai digeser acak antara <b>+Min</b> s.d. <b>+Max</b> menit dari jadwal. Rekomendasi: <b>+2 hingga +8</b>.</p>
+                </div>
               </div>
 
               <!-- Audio Terpisah Container (Expandable) -->
@@ -1250,7 +1373,7 @@
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <div>
                   <label class="text-xs text-gray-400 block mb-1">Start Stream</label>
-                  <input type="datetime-local" id="editScheduleStartTime" name="scheduleStartTime"
+                  <input type="datetime-local" step="1" id="editScheduleStartTime" name="scheduleStartTime"
                     class="w-full h-[42px] px-4 bg-dark-700 border border-gray-600 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary text-sm [color-scheme:dark]">
                 </div>
                 <div>
@@ -1513,7 +1636,7 @@
                   <div id="editYtScheduleSettings" class="hidden space-y-4">
                     <div>
                       <label class="text-xs text-gray-400 block mb-1">Start Time</label>
-                      <input type="datetime-local" id="editYtScheduleStart" name="ytScheduleStart" class="w-full h-[42px] px-4 bg-dark-700 border border-gray-600 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary text-sm [color-scheme:dark]">
+                      <input type="datetime-local" step="1" id="editYtScheduleStart" name="ytScheduleStart" class="w-full h-[42px] px-4 bg-dark-700 border border-gray-600 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary text-sm [color-scheme:dark]">
                     </div>
                     <div>
                       <label class="text-xs text-gray-400 mb-1 flex items-center">
@@ -2861,6 +2984,7 @@
     function toggleClockOptions(checked) {
       const panel = document.getElementById('clockOptionsPanel');
       if (panel) panel.classList.toggle('hidden', !checked);
+      updateClockPreview(false);
     }
     function toggleDurationJitter(checked) {
       const panel = document.getElementById('durationJitterPanel');
@@ -2873,6 +2997,7 @@
     function toggleEditClockOptions(checked) {
       const panel = document.getElementById('editClockOptionsPanel');
       if (panel) panel.classList.toggle('hidden', !checked);
+      updateClockPreview(true);
     }
     function toggleEditDurationJitter(checked) {
       const panel = document.getElementById('editDurationJitterPanel');
@@ -2882,6 +3007,65 @@
       const panel = document.getElementById('editSchedulerJitterPanel');
       if (panel) panel.classList.toggle('hidden', !checked);
     }
+
+    
+    // Palet warna estetik harian (Senin - Minggu)
+    const DAILY_PALETTE = [
+      '#FF5722', // Minggu: Deep Orange
+      '#FFEB3B', // Senin: Bright Yellow
+      '#4CAF50', // Selasa: Neon Green
+      '#00BCD4', // Rabu: Cyan
+      '#2196F3', // Kamis: Dodger Blue
+      '#E91E63', // Jumat: Vibrant Pink
+      '#9C27B0'  // Sabtu: Purple
+    ];
+
+    function getDailyColor() {
+      const day = new Date().getDay(); // 0 - 6
+      return DAILY_PALETTE[day] || '#FFFFFF';
+    }
+
+    function updateClockPreview(isEdit = false) {
+      const enabled = document.getElementById(isEdit ? 'editClockEnabled' : 'clockEnabled')?.checked || false;
+      const overlay = document.getElementById(isEdit ? 'editClockPreviewOverlay' : 'clockPreviewOverlay');
+      if (!overlay) return;
+
+      if (!enabled) {
+        overlay.classList.add('hidden');
+        return;
+      }
+
+      overlay.classList.remove('hidden');
+
+      const colorMode = document.getElementById(isEdit ? 'editClockColorMode' : 'clockColorMode')?.value || 'static';
+      const staticColor = document.getElementById(isEdit ? 'editClockColor' : 'clockColor')?.value || '#FFFFFF';
+      const size = parseInt(document.getElementById(isEdit ? 'editClockSize' : 'clockSize')?.value || '28');
+      const x = parseInt(document.getElementById(isEdit ? 'editClockX' : 'clockX')?.value || '10');
+      const y = parseInt(document.getElementById(isEdit ? 'editClockY' : 'clockY')?.value || '10');
+
+      let displayColor = staticColor;
+      if (colorMode === 'daily') {
+        displayColor = getDailyColor();
+      } else if (colorMode === 'random') {
+        displayColor = '#00FFCC'; // indikator preview mode acak
+      }
+
+      // Terapkan style langsung ke elemen preview overlay
+      overlay.style.color = displayColor;
+      // Skala preview ukuran font agar proporsional di kotak preview (sekitar 50-60% dari ukuran render video)
+      overlay.style.fontSize = Math.max(10, Math.round(size * 0.55)) + 'px';
+      overlay.style.left = Math.max(4, Math.round(x * 0.35)) + 'px';
+      overlay.style.top = Math.max(4, Math.round(y * 0.35)) + 'px';
+    }
+
+    // Sambungkan input change/input di modal Create Stream
+    ['clockColor', 'clockSize', 'clockX', 'clockY', 'clockColorMode'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', () => updateClockPreview(false));
+        el.addEventListener('change', () => updateClockPreview(false));
+      }
+    });
 
     let currentPage = 1;
     let currentLimit = 50;
@@ -4669,6 +4853,38 @@
       if (document.getElementById('editYtAntiFingerprint')) document.getElementById('editYtAntiFingerprint').checked = !!stream.anti_fingerprint;
       if (document.getElementById('editSpoofObs')) document.getElementById('editSpoofObs').checked = !!stream.spoof_obs;
       if (document.getElementById('editYtSpoofObs')) document.getElementById('editYtSpoofObs').checked = !!stream.spoof_obs;
+
+      // Populate Realtime Clock di modal edit
+      if (document.getElementById('editClockEnabled')) {
+        const isClock = !!stream.clock_enabled;
+        document.getElementById('editClockEnabled').checked = isClock;
+        toggleEditClockOptions(isClock);
+      }
+      if (document.getElementById('editClockColor')) document.getElementById('editClockColor').value = stream.clock_color || '#FFFFFF';
+      if (document.getElementById('editClockColorPicker')) document.getElementById('editClockColorPicker').value = stream.clock_color || '#FFFFFF';
+      if (document.getElementById('editClockSize')) document.getElementById('editClockSize').value = stream.clock_size || 28;
+      if (document.getElementById('editClockX')) document.getElementById('editClockX').value = stream.clock_x !== undefined && stream.clock_x !== null ? stream.clock_x : 10;
+      if (document.getElementById('editClockY')) document.getElementById('editClockY').value = stream.clock_y !== undefined && stream.clock_y !== null ? stream.clock_y : 10;
+      if (document.getElementById('editClockColorMode')) document.getElementById('editClockColorMode').value = stream.clock_color_mode || 'static';
+      updateClockPreview(true);
+
+      // Populate Duration Jitter di modal edit
+      if (document.getElementById('editDurationJitterEnabled')) {
+        const isDJ = !!stream.duration_jitter_enabled;
+        document.getElementById('editDurationJitterEnabled').checked = isDJ;
+        toggleEditDurationJitter(isDJ);
+      }
+      if (document.getElementById('editDurationJitterMin')) document.getElementById('editDurationJitterMin').value = stream.duration_jitter_min !== undefined && stream.duration_jitter_min !== null ? stream.duration_jitter_min : -7;
+      if (document.getElementById('editDurationJitterMax')) document.getElementById('editDurationJitterMax').value = stream.duration_jitter_max !== undefined && stream.duration_jitter_max !== null ? stream.duration_jitter_max : 7;
+
+      // Populate Scheduler Jitter di modal edit
+      if (document.getElementById('editSchedulerJitterEnabled')) {
+        const isSJ = !!stream.scheduler_jitter_enabled;
+        document.getElementById('editSchedulerJitterEnabled').checked = isSJ;
+        toggleEditSchedulerJitter(isSJ);
+      }
+      if (document.getElementById('editSchedulerJitterMin')) document.getElementById('editSchedulerJitterMin').value = stream.scheduler_jitter_min !== undefined && stream.scheduler_jitter_min !== null ? stream.scheduler_jitter_min : 2;
+      if (document.getElementById('editSchedulerJitterMax')) document.getElementById('editSchedulerJitterMax').value = stream.scheduler_jitter_max !== undefined && stream.scheduler_jitter_max !== null ? stream.scheduler_jitter_max : 8;
       const bitrateSelect = document.getElementById('editBitrate');
       for (let i = 0; i < bitrateSelect.options.length; i++) {
         if (bitrateSelect.options[i].value == stream.bitrate) {
@@ -4834,14 +5050,16 @@
       updateDurationBadge(true);
     }
     
-    function formatDateTimeLocal(date) {
-      const serverDate = convertFromServerTime(date.toISOString());
+        function formatDateTimeLocal(date) {
+      if (!date || isNaN(new Date(date).getTime())) return '';
+      const serverDate = convertFromServerTime(new Date(date).toISOString());
       const year = serverDate.getFullYear();
       const month = String(serverDate.getMonth() + 1).padStart(2, '0');
       const day = String(serverDate.getDate()).padStart(2, '0');
       const hours = String(serverDate.getHours()).padStart(2, '0');
       const minutes = String(serverDate.getMinutes()).padStart(2, '0');
-      return `${year}-${month}-${day}T${hours}:${minutes}`;
+      const seconds = String(serverDate.getSeconds()).padStart(2, '0');
+      return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
     }
     function closeEditStreamModal() {
       const modal = document.getElementById('editStreamModal');
@@ -5296,7 +5514,22 @@
             channelName: document.getElementById('editChannelName')?.value || '',
             useAdvancedSettings: !document.getElementById('editAdvancedSettingsContent').classList.contains('hidden'),
             antiFingerprint: document.getElementById('editAntiFingerprint')?.checked || false,
-            spoofObs: document.getElementById('editSpoofObs')?.checked || false
+            spoofObs: document.getElementById('editSpoofObs')?.checked || false,
+            // Realtime Clock
+            clockEnabled: document.getElementById('editClockEnabled')?.checked || false,
+            clockColor: document.getElementById('editClockColor')?.value || '#FFFFFF',
+            clockSize: parseInt(document.getElementById('editClockSize')?.value || '28'),
+            clockX: parseInt(document.getElementById('editClockX')?.value || '10'),
+            clockY: parseInt(document.getElementById('editClockY')?.value || '10'),
+            clockColorMode: document.getElementById('editClockColorMode')?.value || 'static',
+            // Duration Jitter
+            durationJitterEnabled: document.getElementById('editDurationJitterEnabled')?.checked || false,
+            durationJitterMin: parseInt(document.getElementById('editDurationJitterMin')?.value || '-7'),
+            durationJitterMax: parseInt(document.getElementById('editDurationJitterMax')?.value || '7'),
+            // Scheduler Jitter
+            schedulerJitterEnabled: document.getElementById('editSchedulerJitterEnabled')?.checked || false,
+            schedulerJitterMin: parseInt(document.getElementById('editSchedulerJitterMin')?.value || '2'),
+            schedulerJitterMax: parseInt(document.getElementById('editSchedulerJitterMax')?.value || '8')
           };
           const isDaily = currentEditVideoMode === 'daily_rotation' ? true : (document.getElementById('editIsDaily')?.checked || false);
           let scheduleStartTime = document.getElementById('editScheduleStartTime')?.value;

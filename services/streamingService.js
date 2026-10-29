@@ -138,9 +138,23 @@ function getRealtimeClockFilter(stream, startEpoch) {
   if (mode === 'random') {
     // warna acak tiap 30 detik (R/G/B acak per detik)
     colorPart = `fontcolor_expr='if(gte(mod(t\\,30)\\,15)\\,0xff%{eif\\:(random(1)*255)\\:02x}%{eif\\:(random(2)*255)\\:02x}\\,0x%{eif\\:(random(3)*255)\\:02x}ff%{eif\\:(random(4)*255)\\:02x})'`;
+  } else if (mode === 'daily') {
+    // Berganti warna otomatis setiap hari (Senin - Minggu)
+    const dailyColors = [
+      '0xFF5722', // Minggu: Deep Orange
+      '0xFFEB3B', // Senin: Bright Yellow
+      '0x4CAF50', // Selasa: Neon Green
+      '0x00BCD4', // Rabu: Cyan
+      '0x2196F3', // Kamis: Dodger Blue
+      '0xE91E63', // Jumat: Vibrant Pink
+      '0x9C27B0'  // Sabtu: Purple
+    ];
+    const dayOfWeek = new Date().getDay();
+    const dailyHex = dailyColors[dayOfWeek] || '0xFFFFFF';
+    colorPart = `fontcolor=${dailyHex}`;
   } else {
     // warna statik - konversi hex #RRGGBB => 0xRRGGBB
-    const hexColor = color.replace('#', '0x');
+    const hexColor = (color || '#FFFFFF').replace('#', '0x');
     colorPart = `fontcolor=${hexColor}`;
   }
 

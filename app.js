@@ -3142,9 +3142,11 @@ app.post('/api/streams', isAuthenticated, [
     function parseLocalDateTime(dateTimeString) {
       const [datePart, timePart] = dateTimeString.split('T');
       const [year, month, day] = datePart.split('-').map(Number);
-      const [hours, minutes] = timePart.split(':').map(Number);
-      
-      return new Date(year, month - 1, day, hours, minutes);
+      const timeParts = timePart.split(':').map(Number);
+      const hours = timeParts[0] || 0;
+      const minutes = timeParts[1] || 0;
+      const seconds = timeParts[2] || 0;
+      return new Date(year, month - 1, day, hours, minutes, seconds);
     }
     
     streamData.is_daily = req.body.isDaily === 'true' || req.body.isDaily === true;
@@ -3722,9 +3724,11 @@ app.put('/api/streams/:id', isAuthenticated, uploadThumbnail.single('thumbnail')
     function parseLocalDateTime(dateTimeString) {
       const [datePart, timePart] = dateTimeString.split('T');
       const [year, month, day] = datePart.split('-').map(Number);
-      const [hours, minutes] = timePart.split(':').map(Number);
-      
-      return new Date(year, month - 1, day, hours, minutes);
+      const timeParts = timePart.split(':').map(Number);
+      const hours = timeParts[0] || 0;
+      const minutes = timeParts[1] || 0;
+      const seconds = timeParts[2] || 0;
+      return new Date(year, month - 1, day, hours, minutes, seconds);
     }
     
     if (req.body.isDaily !== undefined) {
