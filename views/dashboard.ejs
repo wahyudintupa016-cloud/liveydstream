@@ -394,7 +394,7 @@
                     <!-- Live Realtime Clock Preview Badge (Always on top) -->
                     <div id="clockPreviewOverlay" class="hidden pointer-events-none absolute z-30 font-mono font-bold select-none shadow-lg tracking-wider"
                       style="background: rgba(0,0,0,0.7); padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); text-shadow: 1px 1px 2px black;">
-                      Elapsed: 00:00:00
+                      00:00:00
                     </div>
                     <div id="emptyPreview" class="h-full flex flex-col items-center justify-center">
                       <i class="ti ti-video text-4xl text-gray-600 mb-2"></i>
@@ -497,21 +497,21 @@
                       </select>
                     </div>
                   </div>
-                  <div class="grid grid-cols-3 gap-2">
+                  <div class="grid grid-cols-3 gap-3">
                     <div>
-                      <label class="text-[11px] text-gray-400 block mb-1">Ukuran Font (px)</label>
-                      <input type="number" id="clockSize" name="clockSize" value="28" min="10" max="72" oninput="updateClockPreview(false);"
-                        class="w-full h-8 px-2 bg-dark-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:border-yellow-500">
+                      <label class="text-[11px] text-gray-300 block mb-1 font-medium">Ukuran Font (px)</label>
+                      <input type="number" id="clockSize" name="clockSize" value="28" min="10" max="150" oninput="updateClockPreview(false);"
+                        class="w-full h-[38px] px-3 bg-dark-700 border border-gray-600 rounded-lg text-sm text-white font-mono focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500">
                     </div>
                     <div>
-                      <label class="text-[11px] text-gray-400 block mb-1">Posisi X (px)</label>
-                      <input type="number" id="clockX" name="clockX" value="10" min="0" oninput="updateClockPreview(false);"
-                        class="w-full h-8 px-2 bg-dark-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:border-yellow-500">
+                      <label class="text-[11px] text-gray-300 block mb-1 font-medium">Posisi X (Kiri px)</label>
+                      <input type="number" id="clockX" name="clockX" value="10" min="0" max="3840" oninput="updateClockPreview(false);"
+                        class="w-full h-[38px] px-3 bg-dark-700 border border-gray-600 rounded-lg text-sm text-white font-mono focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500">
                     </div>
                     <div>
-                      <label class="text-[11px] text-gray-400 block mb-1">Posisi Y (px)</label>
-                      <input type="number" id="clockY" name="clockY" value="10" min="0" oninput="updateClockPreview(false);"
-                        class="w-full h-8 px-2 bg-dark-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:border-yellow-500">
+                      <label class="text-[11px] text-gray-300 block mb-1 font-medium">Posisi Y (Atas px)</label>
+                      <input type="number" id="clockY" name="clockY" value="10" min="0" max="2160" oninput="updateClockPreview(false);"
+                        class="w-full h-[38px] px-3 bg-dark-700 border border-gray-600 rounded-lg text-sm text-white font-mono focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500">
                     </div>
                   </div>
                   <p class="text-[10px] text-yellow-300/70"><i class="ti ti-info-circle mr-1"></i>Menampilkan <b>elapsed time</b> (menit:detik berlalu). Teks berubah tiap detik sehingga hash visual unik tiap frame.</p>
@@ -1136,7 +1136,7 @@
                     <!-- Live Realtime Clock Preview Badge Edit (Always on top) -->
                     <div id="editClockPreviewOverlay" class="hidden pointer-events-none absolute z-30 font-mono font-bold select-none shadow-lg tracking-wider"
                       style="background: rgba(0,0,0,0.7); padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); text-shadow: 1px 1px 2px black;">
-                      Elapsed: 00:00:00
+                      00:00:00
                     </div>
                     <div id="editEmptyPreview" class="h-full flex flex-col items-center justify-center">
                       <i class="ti ti-video text-4xl text-gray-600 mb-2"></i>
@@ -1239,21 +1239,21 @@
                       </select>
                     </div>
                   </div>
-                  <div class="grid grid-cols-3 gap-2">
+                  <div class="grid grid-cols-3 gap-3">
                     <div>
-                      <label class="text-[11px] text-gray-400 block mb-1">Ukuran Font (px)</label>
-                      <input type="number" id="editClockSize" name="clockSize" value="28" min="10" max="72" oninput="updateClockPreview(true);"
-                        class="w-full h-8 px-2 bg-dark-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:border-yellow-500">
+                      <label class="text-[11px] text-gray-300 block mb-1 font-medium">Ukuran Font (px)</label>
+                      <input type="number" id="editClockSize" name="clockSize" value="28" min="10" max="150" oninput="updateClockPreview(true);"
+                        class="w-full h-[38px] px-3 bg-dark-700 border border-gray-600 rounded-lg text-sm text-white font-mono focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500">
                     </div>
                     <div>
-                      <label class="text-[11px] text-gray-400 block mb-1">Posisi X (px)</label>
-                      <input type="number" id="editClockX" name="clockX" value="10" min="0" oninput="updateClockPreview(true);"
-                        class="w-full h-8 px-2 bg-dark-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:border-yellow-500">
+                      <label class="text-[11px] text-gray-300 block mb-1 font-medium">Posisi X (Kiri px)</label>
+                      <input type="number" id="editClockX" name="clockX" value="10" min="0" max="3840" oninput="updateClockPreview(true);"
+                        class="w-full h-[38px] px-3 bg-dark-700 border border-gray-600 rounded-lg text-sm text-white font-mono focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500">
                     </div>
                     <div>
-                      <label class="text-[11px] text-gray-400 block mb-1">Posisi Y (px)</label>
-                      <input type="number" id="editClockY" name="clockY" value="10" min="0" oninput="updateClockPreview(true);"
-                        class="w-full h-8 px-2 bg-dark-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:border-yellow-500">
+                      <label class="text-[11px] text-gray-300 block mb-1 font-medium">Posisi Y (Atas px)</label>
+                      <input type="number" id="editClockY" name="clockY" value="10" min="0" max="2160" oninput="updateClockPreview(true);"
+                        class="w-full h-[38px] px-3 bg-dark-700 border border-gray-600 rounded-lg text-sm text-white font-mono focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500">
                     </div>
                   </div>
                   <p class="text-[10px] text-yellow-300/70"><i class="ti ti-info-circle mr-1"></i>Menampilkan <b>elapsed time</b> (menit:detik). Posisi & warna dapat dilihat langsung di kotak preview video di samping!</p>
@@ -5297,7 +5297,7 @@
         <source src="${video.url}" type="video/mp4">
         Your browser does not support the video tag.
       </video>
-      <div id="editClockPreviewOverlay" class="hidden pointer-events-none absolute z-20 font-mono font-bold select-none transition-all shadow-md" style="background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.25);">Elapsed: 00:00:00</div>
+      <div id="editClockPreviewOverlay" class="hidden pointer-events-none absolute z-20 font-mono font-bold select-none transition-all shadow-md" style="background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.25);">00:00:00</div>
     </div>
   `;
       if (typeof updateClockPreview === 'function') updateClockPreview(true);
