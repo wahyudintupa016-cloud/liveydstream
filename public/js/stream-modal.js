@@ -139,7 +139,8 @@ function selectVideo(video) {
   } else {
     desktopPreview.classList.remove('hidden'); mobilePreview.classList.remove('hidden');
     desktopEmptyPreview.classList.add('hidden'); mobileEmptyPreview.classList.add('hidden');
-    document.getElementById('videoPreview').innerHTML = `<video id="native-preview-desktop" class="native-video-player rounded-lg" controls preload="metadata"><source src="${video.url}" type="video/mp4">Your browser does not support the video tag.</video>`;
+    document.getElementById('videoPreview').innerHTML = `<div class="relative w-full h-full"><video id="native-preview-desktop" class="native-video-player rounded-lg w-full h-full" controls preload="metadata"><source src="${video.url}" type="video/mp4">Your browser does not support the video tag.</video><div id="clockPreviewOverlay" class="hidden pointer-events-none absolute z-20 font-mono font-bold select-none transition-all shadow-md" style="background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.25);">Elapsed: 00:00:00</div></div>`;
+    if (typeof updateClockPreview === 'function') updateClockPreview(false);
     document.getElementById('videoPreviewMobile').innerHTML = `<video id="native-preview-mobile" class="native-video-player" controls preload="metadata"><source src="${video.url}" type="video/mp4">Your browser does not support the video tag.</video>`;
   }
   document.getElementById('videoSelectorDropdown').classList.add('hidden');
