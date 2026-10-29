@@ -1,4 +1,4 @@
-const { v4: uuidv4 } = require('uuid');
+﻿const { v4: uuidv4 } = require('uuid');
 const { db } = require('../db/database');
 class Stream {
   static create(streamData) {
@@ -40,7 +40,22 @@ class Stream {
       video_ids = null,
       current_video_index = 0,
       anti_fingerprint = false,
-      spoof_obs = false
+      spoof_obs = false,
+      // Realtime Clock
+      clock_enabled = false,
+      clock_color = '#FFFFFF',
+      clock_size = 28,
+      clock_x = 10,
+      clock_y = 10,
+      clock_color_mode = 'static',
+      // Duration Jitter
+      duration_jitter_enabled = false,
+      duration_jitter_min = -5,
+      duration_jitter_max = 5,
+      // Scheduler Jitter
+      scheduler_jitter_enabled = false,
+      scheduler_jitter_min = 2,
+      scheduler_jitter_max = 8
     } = streamData;
     const loop_video_int = loop_video ? 1 : 0;
     const use_advanced_settings_int = use_advanced_settings ? 1 : 0;
@@ -48,6 +63,9 @@ class Stream {
     const is_daily_int = is_daily ? 1 : 0;
     const anti_fingerprint_int = anti_fingerprint ? 1 : 0;
     const spoof_obs_int = spoof_obs ? 1 : 0;
+    const clock_enabled_int = clock_enabled ? 1 : 0;
+    const duration_jitter_enabled_int = duration_jitter_enabled ? 1 : 0;
+    const scheduler_jitter_enabled_int = scheduler_jitter_enabled ? 1 : 0;
     const final_status = status || (schedule_time ? 'scheduled' : 'offline');
     const status_updated_at = new Date().toISOString();
     return new Promise((resolve, reject) => {
@@ -58,15 +76,21 @@ class Stream {
           schedule_time, end_time, duration, status, status_updated_at, use_advanced_settings, user_id,
           youtube_broadcast_id, youtube_stream_id, youtube_description, youtube_privacy, youtube_category, youtube_tags, youtube_thumbnail, youtube_channel_id, is_youtube_api, is_daily, channel_name,
           audio_mode, audio_id, audio_ids, current_audio_index,
-          video_mode, video_ids, current_video_index, anti_fingerprint, spoof_obs
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          video_mode, video_ids, current_video_index, anti_fingerprint, spoof_obs,
+          clock_enabled, clock_color, clock_size, clock_x, clock_y, clock_color_mode,
+          duration_jitter_enabled, duration_jitter_min, duration_jitter_max,
+          scheduler_jitter_enabled, scheduler_jitter_min, scheduler_jitter_max
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           id, title, video_id, rtmp_url, stream_key, platform, platform_icon,
           bitrate, resolution, fps, orientation, loop_video_int,
           schedule_time, end_time, duration, final_status, status_updated_at, use_advanced_settings_int, user_id,
           youtube_broadcast_id, youtube_stream_id, youtube_description, youtube_privacy, youtube_category, youtube_tags, youtube_thumbnail, youtube_channel_id, is_youtube_api_int, is_daily_int, channel_name,
           audio_mode, audio_id, typeof audio_ids === 'object' ? JSON.stringify(audio_ids) : audio_ids, current_audio_index,
-          video_mode, typeof video_ids === 'object' ? JSON.stringify(video_ids) : video_ids, current_video_index, anti_fingerprint_int, spoof_obs_int
+          video_mode, typeof video_ids === 'object' ? JSON.stringify(video_ids) : video_ids, current_video_index, anti_fingerprint_int, spoof_obs_int,
+          clock_enabled_int, clock_color, clock_size, clock_x, clock_y, clock_color_mode,
+          duration_jitter_enabled_int, duration_jitter_min, duration_jitter_max,
+          scheduler_jitter_enabled_int, scheduler_jitter_min, scheduler_jitter_max
         ],
         function (err) {
           if (err) {
@@ -92,6 +116,39 @@ class Stream {
           row.is_daily = row.is_daily === 1;
           row.anti_fingerprint = row.anti_fingerprint === 1;
           row.spoof_obs = row.spoof_obs === 1;
+          row.clock_enabled = row.clock_enabled === 1;
+          row.duration_jitter_enabled = row.duration_jitter_enabled === 1;
+          row.scheduler_jitter_enabled = row.scheduler_jitter_enabled === 1;
+          row.clock_enabled = row.clock_enabled === 1;
+          row.duration_jitter_enabled = row.duration_jitter_enabled === 1;
+          row.scheduler_jitter_enabled = row.scheduler_jitter_enabled === 1;
+          row.clock_enabled = row.clock_enabled === 1;
+          row.duration_jitter_enabled = row.duration_jitter_enabled === 1;
+          row.scheduler_jitter_enabled = row.scheduler_jitter_enabled === 1;
+          row.clock_enabled = row.clock_enabled === 1;
+          row.duration_jitter_enabled = row.duration_jitter_enabled === 1;
+          row.scheduler_jitter_enabled = row.scheduler_jitter_enabled === 1;
+          row.clock_enabled = row.clock_enabled === 1;
+          row.duration_jitter_enabled = row.duration_jitter_enabled === 1;
+          row.scheduler_jitter_enabled = row.scheduler_jitter_enabled === 1;
+          row.clock_enabled = row.clock_enabled === 1;
+          row.duration_jitter_enabled = row.duration_jitter_enabled === 1;
+          row.scheduler_jitter_enabled = row.scheduler_jitter_enabled === 1;
+          row.clock_enabled = row.clock_enabled === 1;
+          row.duration_jitter_enabled = row.duration_jitter_enabled === 1;
+          row.scheduler_jitter_enabled = row.scheduler_jitter_enabled === 1;
+          row.clock_enabled = row.clock_enabled === 1;
+          row.duration_jitter_enabled = row.duration_jitter_enabled === 1;
+          row.scheduler_jitter_enabled = row.scheduler_jitter_enabled === 1;
+          row.clock_enabled = row.clock_enabled === 1;
+          row.duration_jitter_enabled = row.duration_jitter_enabled === 1;
+          row.scheduler_jitter_enabled = row.scheduler_jitter_enabled === 1;
+          row.clock_enabled = row.clock_enabled === 1;
+          row.duration_jitter_enabled = row.duration_jitter_enabled === 1;
+          row.scheduler_jitter_enabled = row.scheduler_jitter_enabled === 1;
+          row.clock_enabled = row.clock_enabled === 1;
+          row.duration_jitter_enabled = row.duration_jitter_enabled === 1;
+          row.scheduler_jitter_enabled = row.scheduler_jitter_enabled === 1;
         }
         resolve(row);
       });
@@ -166,6 +223,9 @@ class Stream {
             row.is_daily = row.is_daily === 1;
             row.anti_fingerprint = row.anti_fingerprint === 1;
             row.spoof_obs = row.spoof_obs === 1;
+            row.clock_enabled = row.clock_enabled === 1;
+            row.duration_jitter_enabled = row.duration_jitter_enabled === 1;
+            row.scheduler_jitter_enabled = row.scheduler_jitter_enabled === 1;
           });
         }
         resolve(rows || []);
@@ -255,6 +315,9 @@ class Stream {
               row.is_daily = row.is_daily === 1;
               row.anti_fingerprint = row.anti_fingerprint === 1;
               row.spoof_obs = row.spoof_obs === 1;
+              row.clock_enabled = row.clock_enabled === 1;
+              row.duration_jitter_enabled = row.duration_jitter_enabled === 1;
+              row.scheduler_jitter_enabled = row.scheduler_jitter_enabled === 1;
             });
           }
           resolve({
@@ -274,7 +337,7 @@ class Stream {
     const fields = [];
     const values = [];
     Object.entries(streamData).forEach(([key, value]) => {
-      if ((key === 'loop_video' || key === 'is_daily' || key === 'anti_fingerprint' || key === 'spoof_obs') && typeof value === 'boolean') {
+      if ((key === 'loop_video' || key === 'is_daily' || key === 'anti_fingerprint' || key === 'spoof_obs' || key === 'clock_enabled' || key === 'duration_jitter_enabled' || key === 'scheduler_jitter_enabled') && typeof value === 'boolean') {
         fields.push(`${key} = ?`);
         values.push(value ? 1 : 0);
       } else {
@@ -453,6 +516,9 @@ class Stream {
             row.is_daily = row.is_daily === 1;
             row.anti_fingerprint = row.anti_fingerprint === 1;
             row.spoof_obs = row.spoof_obs === 1;
+            row.clock_enabled = row.clock_enabled === 1;
+            row.duration_jitter_enabled = row.duration_jitter_enabled === 1;
+            row.scheduler_jitter_enabled = row.scheduler_jitter_enabled === 1;
           }
           resolve(row);
         }

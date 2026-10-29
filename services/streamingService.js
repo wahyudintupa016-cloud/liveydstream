@@ -1,4 +1,4 @@
-const { spawn } = require('child_process');
+﻿const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
@@ -114,6 +114,61 @@ function getAudioEncodingArgs(stream, fallbackBitrate = '192k') {
     ];
   }
   return null;
+}
+
+/**
+ * Build drawtext filter for Realtime Clock overlay (elapsed time).
+ * @param {object} stream - stream object dengan field clock_*
+ * @param {number} startEpoch - unix timestamp (detik) saat stream dimulai
+ * @returns {string|null} filter string atau null jika tidak aktif
+ */
+function getRealtimeClockFilter(stream, startEpoch) {
+  if (!stream.clock_enabled) return null;
+
+  const color = stream.clock_color || '#FFFFFF';
+  const size = stream.clock_size || 28;
+  const x = stream.clock_x || 10;
+  const y = stream.clock_y || 10;
+  const mode = stream.clock_color_mode || 'static';
+
+  // elapsed menit:detik sejak stream mulai
+  const elapsed = `%{eif\\:(t - ${startEpoch}) / 60\\:d}\\:%{eif\\:mod(t - ${startEpoch}\\,60)\\:02d}`;
+
+  let colorPart;
+  if (mode === 'random') {
+    // warna acak tiap 30 detik (R/G/B acak per detik)
+    colorPart = `fontcolor_expr='if(gte(mod(t\\,30)\\,15)\\,0xff%{eif\\:(random(1)*255)\\:02x}%{eif\\:(random(2)*255)\\:02x}\\,0x%{eif\\:(random(3)*255)\\:02x}ff%{eif\\:(random(4)*255)\\:02x})'`;
+  } else {
+    // warna statik - konversi hex #RRGGBB => 0xRRGGBB
+    const hexColor = color.replace('#', '0x');
+    colorPart = `fontcolor=${hexColor}`;
+  }
+
+  return [
+    `drawtext=fontsize=${size}`,
+    `x=${x}`,
+    `y=${y}`,
+    `text='Elapsed\\: ${elapsed}'`,
+    colorPart,
+    `box=1`,
+    `boxcolor=black@0.4`,
+    `boxborderw=4`
+  ].join(':');
+}
+
+/**
+ * Hitung durasi (detik) dengan jitter.
+ * @param {object} stream
+ * @param {number} baseDurationSec - durasi dasar dalam detik
+ * @returns {number} durasi akhir dalam detik
+ */
+function applyDurationJitter(stream, baseDurationSec) {
+  if (!stream.duration_jitter_enabled) return baseDurationSec;
+  const minJ = stream.duration_jitter_min != null ? stream.duration_jitter_min : -5;
+  const maxJ = stream.duration_jitter_max != null ? stream.duration_jitter_max : 5;
+  const jitter = Math.floor(Math.random() * (maxJ - minJ + 1)) + minJ; // menit
+  const result = baseDurationSec + jitter * 60;
+  return Math.max(result, 60); // minimal 1 menit
 }
 
 
@@ -368,6 +423,21 @@ async function buildFFmpegArgs(stream) {
 
   const rtmpUrl = formatRtmpUrl(stream.rtmp_url, stream.stream_key);
   const loopValue = stream.loop_video ? '-1' : '0';
+
+  // --- Realtime Clock ---
+  const startEpoch = Math.floor(Date.now() / 1000);
+  const clockFilter = getRealtimeClockFilter(stream, startEpoch);
+  if (clockFilter) {
+    addStreamLog(stream.id, `[RealtimeClock] Overlay aktif: size=${stream.clock_size}px, color=${stream.clock_color}, mode=${stream.clock_color_mode}`);
+  }
+  // --- Duration Jitter (untuk stream dengan durasi terbatas) ---
+  let jitteredDurationSec = null;
+  if (stream.duration && stream.duration_jitter_enabled) {
+    const parts = String(stream.duration).split(':').map(Number);
+    const baseSec = parts.length >= 2 ? parts[0] * 60 + (parts[1] || 0) : parts[0] * 60;
+    jitteredDurationSec = applyDurationJitter(stream, baseSec);
+    addStreamLog(stream.id, `[DurationJitter] Durasi final: ${Math.floor(jitteredDurationSec/60)} menit ${jitteredDurationSec%60} detik`);
+  }
 
   const hasSeparateAudio = stream.audio_mode && stream.audio_mode !== 'none';
   if (hasSeparateAudio) {

@@ -3123,6 +3123,18 @@ app.post('/api/streams', isAuthenticated, [
       channel_name: req.body.channelName ? req.body.channelName.trim() : null,
       anti_fingerprint: req.body.antiFingerprint === 'true' || req.body.antiFingerprint === true,
       spoof_obs: req.body.spoofObs === 'true' || req.body.spoofObs === true,
+      clock_enabled: req.body.clockEnabled === 'true' || req.body.clockEnabled === true,
+      clock_color: req.body.clockColor || '#FFFFFF',
+      clock_size: parseInt(req.body.clockSize) || 28,
+      clock_x: parseInt(req.body.clockX) || 10,
+      clock_y: parseInt(req.body.clockY) || 10,
+      clock_color_mode: req.body.clockColorMode || 'static',
+      duration_jitter_enabled: req.body.durationJitterEnabled === 'true' || req.body.durationJitterEnabled === true,
+      duration_jitter_min: req.body.durationJitterMin !== undefined ? parseInt(req.body.durationJitterMin) : -7,
+      duration_jitter_max: req.body.durationJitterMax !== undefined ? parseInt(req.body.durationJitterMax) : 7,
+      scheduler_jitter_enabled: req.body.schedulerJitterEnabled === 'true' || req.body.schedulerJitterEnabled === true,
+      scheduler_jitter_min: req.body.schedulerJitterMin !== undefined ? parseInt(req.body.schedulerJitterMin) : 2,
+      scheduler_jitter_max: req.body.schedulerJitterMax !== undefined ? parseInt(req.body.schedulerJitterMax) : 8,
       user_id: req.session.userId
     };
     const serverTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -3291,6 +3303,18 @@ app.post('/api/streams/youtube', isAuthenticated, uploadThumbnail.single('thumbn
       use_advanced_settings: false,
       anti_fingerprint: req.body.antiFingerprint === 'true' || req.body.antiFingerprint === true,
       spoof_obs: req.body.spoofObs === 'true' || req.body.spoofObs === true,
+      clock_enabled: req.body.clockEnabled === 'true' || req.body.clockEnabled === true,
+      clock_color: req.body.clockColor || '#FFFFFF',
+      clock_size: parseInt(req.body.clockSize) || 28,
+      clock_x: parseInt(req.body.clockX) || 10,
+      clock_y: parseInt(req.body.clockY) || 10,
+      clock_color_mode: req.body.clockColorMode || 'static',
+      duration_jitter_enabled: req.body.durationJitterEnabled === 'true' || req.body.durationJitterEnabled === true,
+      duration_jitter_min: req.body.durationJitterMin !== undefined ? parseInt(req.body.durationJitterMin) : -7,
+      duration_jitter_max: req.body.durationJitterMax !== undefined ? parseInt(req.body.durationJitterMax) : 7,
+      scheduler_jitter_enabled: req.body.schedulerJitterEnabled === 'true' || req.body.schedulerJitterEnabled === true,
+      scheduler_jitter_min: req.body.schedulerJitterMin !== undefined ? parseInt(req.body.schedulerJitterMin) : 2,
+      scheduler_jitter_max: req.body.schedulerJitterMax !== undefined ? parseInt(req.body.schedulerJitterMax) : 8,
       user_id: req.session.userId,
       youtube_broadcast_id: null,
       youtube_stream_id: null,
@@ -3464,6 +3488,19 @@ app.put('/api/streams/:id', isAuthenticated, uploadThumbnail.single('thumbnail')
       if (req.body.spoofObs !== undefined) {
         updateData.spoof_obs = req.body.spoofObs === 'true' || req.body.spoofObs === true;
       }
+      // New anti-spam fields
+      if (req.body.clockEnabled !== undefined) updateData.clock_enabled = req.body.clockEnabled === 'true' || req.body.clockEnabled === true;
+      if (req.body.clockColor !== undefined) updateData.clock_color = req.body.clockColor;
+      if (req.body.clockSize !== undefined) updateData.clock_size = parseInt(req.body.clockSize);
+      if (req.body.clockX !== undefined) updateData.clock_x = parseInt(req.body.clockX);
+      if (req.body.clockY !== undefined) updateData.clock_y = parseInt(req.body.clockY);
+      if (req.body.clockColorMode !== undefined) updateData.clock_color_mode = req.body.clockColorMode;
+      if (req.body.durationJitterEnabled !== undefined) updateData.duration_jitter_enabled = req.body.durationJitterEnabled === 'true' || req.body.durationJitterEnabled === true;
+      if (req.body.durationJitterMin !== undefined) updateData.duration_jitter_min = parseInt(req.body.durationJitterMin);
+      if (req.body.durationJitterMax !== undefined) updateData.duration_jitter_max = parseInt(req.body.durationJitterMax);
+      if (req.body.schedulerJitterEnabled !== undefined) updateData.scheduler_jitter_enabled = req.body.schedulerJitterEnabled === 'true' || req.body.schedulerJitterEnabled === true;
+      if (req.body.schedulerJitterMin !== undefined) updateData.scheduler_jitter_min = parseInt(req.body.schedulerJitterMin);
+      if (req.body.schedulerJitterMax !== undefined) updateData.scheduler_jitter_max = parseInt(req.body.schedulerJitterMax);
       
       if (req.body.scheduleStartTime) {
         const scheduleStartDate = parseScheduleDateTime(req.body.scheduleStartTime);

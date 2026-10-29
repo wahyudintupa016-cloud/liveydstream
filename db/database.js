@@ -1,4 +1,4 @@
-const sqlite3 = require('sqlite3').verbose();
+﻿const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
 const bcrypt = require('bcrypt');
@@ -288,6 +288,78 @@ function createTables() {
       db.run(`ALTER TABLE streams ADD COLUMN spoof_obs INTEGER DEFAULT 0`, (err) => {
         if (err && !err.message.includes('duplicate column name')) {
           console.error('Error adding spoof_obs column:', err.message);
+        }
+      });
+
+      db.run(`ALTER TABLE streams ADD COLUMN clock_enabled INTEGER DEFAULT 0`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+          console.error('Error adding clock_enabled column:', err.message);
+        }
+      });
+
+      db.run(`ALTER TABLE streams ADD COLUMN clock_color TEXT DEFAULT '#FFFFFF'`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+          console.error('Error adding clock_color column:', err.message);
+        }
+      });
+
+      db.run(`ALTER TABLE streams ADD COLUMN clock_size INTEGER DEFAULT 28`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+          console.error('Error adding clock_size column:', err.message);
+        }
+      });
+
+      db.run(`ALTER TABLE streams ADD COLUMN clock_x INTEGER DEFAULT 10`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+          console.error('Error adding clock_x column:', err.message);
+        }
+      });
+
+      db.run(`ALTER TABLE streams ADD COLUMN clock_y INTEGER DEFAULT 10`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+          console.error('Error adding clock_y column:', err.message);
+        }
+      });
+
+      db.run(`ALTER TABLE streams ADD COLUMN clock_color_mode TEXT DEFAULT 'static'`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+          console.error('Error adding clock_color_mode column:', err.message);
+        }
+      });
+
+      db.run(`ALTER TABLE streams ADD COLUMN duration_jitter_enabled INTEGER DEFAULT 0`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+          console.error('Error adding duration_jitter_enabled column:', err.message);
+        }
+      });
+
+      db.run(`ALTER TABLE streams ADD COLUMN duration_jitter_min INTEGER DEFAULT -5`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+          console.error('Error adding duration_jitter_min column:', err.message);
+        }
+      });
+
+      db.run(`ALTER TABLE streams ADD COLUMN duration_jitter_max INTEGER DEFAULT 5`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+          console.error('Error adding duration_jitter_max column:', err.message);
+        }
+      });
+
+      db.run(`ALTER TABLE streams ADD COLUMN scheduler_jitter_enabled INTEGER DEFAULT 0`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+          console.error('Error adding scheduler_jitter_enabled column:', err.message);
+        }
+      });
+
+      db.run(`ALTER TABLE streams ADD COLUMN scheduler_jitter_min INTEGER DEFAULT 2`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+          console.error('Error adding scheduler_jitter_min column:', err.message);
+        }
+      });
+
+      db.run(`ALTER TABLE streams ADD COLUMN scheduler_jitter_max INTEGER DEFAULT 8`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+          console.error('Error adding scheduler_jitter_max column:', err.message);
         }
       });
 

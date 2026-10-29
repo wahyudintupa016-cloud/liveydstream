@@ -457,6 +457,118 @@
                     <div class="absolute left-[2px] top-[2px] w-4 h-4 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
                   </label>
                 </div>
+
+                <!-- ======= REALTIME CLOCK ======= -->
+                <div class="h-[44px] flex items-center justify-between bg-dark-700/60 px-3 rounded-lg border border-yellow-700/70" title="Overlay jam digital (elapsed time) di pojok video. Setiap detik jam berubah sehingga hash visual unik dan YouTube tidak mendeteksi duplikat">
+                  <div class="flex items-center gap-1.5">
+                    <i class="ti ti-clock text-yellow-400"></i>
+                    <label class="text-xs sm:text-sm text-yellow-200 font-medium">Realtime Clock</label>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="clockEnabled" name="clockEnabled" class="sr-only peer" onchange="toggleClockOptions(this.checked)">
+                    <div class="w-10 h-5 bg-dark-600 rounded-full peer peer-checked:bg-yellow-500"></div>
+                    <div class="absolute left-[2px] top-[2px] w-4 h-4 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
+                  </label>
+                </div>
+                <!-- Clock Options Panel -->
+                <div id="clockOptionsPanel" class="hidden space-y-2 bg-dark-900/80 p-3 rounded-lg border border-yellow-800/50 mt-1">
+                  <div class="grid grid-cols-2 gap-2">
+                    <div>
+                      <label class="text-[11px] text-gray-400 block mb-1">Warna Teks (hex)</label>
+                      <div class="flex gap-1 items-center">
+                        <input type="color" id="clockColorPicker" value="#FFFFFF" onchange="document.getElementById('clockColor').value=this.value" class="w-8 h-8 rounded cursor-pointer border-0 bg-transparent">
+                        <input type="text" id="clockColor" name="clockColor" value="#FFFFFF" placeholder="#FFFFFF"
+                          class="flex-1 h-8 px-2 bg-dark-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:border-yellow-500"
+                          oninput="document.getElementById('clockColorPicker').value=this.value">
+                      </div>
+                    </div>
+                    <div>
+                      <label class="text-[11px] text-gray-400 block mb-1">Mode Warna</label>
+                      <select id="clockColorMode" name="clockColorMode"
+                        class="w-full h-8 px-2 bg-dark-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:border-yellow-500">
+                        <option value="static">Statik (tetap)</option>
+                        <option value="random">Acak tiap detik</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-3 gap-2">
+                    <div>
+                      <label class="text-[11px] text-gray-400 block mb-1">Ukuran Font (px)</label>
+                      <input type="number" id="clockSize" name="clockSize" value="28" min="10" max="72"
+                        class="w-full h-8 px-2 bg-dark-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:border-yellow-500">
+                    </div>
+                    <div>
+                      <label class="text-[11px] text-gray-400 block mb-1">Posisi X (px)</label>
+                      <input type="number" id="clockX" name="clockX" value="10" min="0"
+                        class="w-full h-8 px-2 bg-dark-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:border-yellow-500">
+                    </div>
+                    <div>
+                      <label class="text-[11px] text-gray-400 block mb-1">Posisi Y (px)</label>
+                      <input type="number" id="clockY" name="clockY" value="10" min="0"
+                        class="w-full h-8 px-2 bg-dark-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:border-yellow-500">
+                    </div>
+                  </div>
+                  <p class="text-[10px] text-yellow-300/70"><i class="ti ti-info-circle mr-1"></i>Menampilkan <b>elapsed time</b> (menit:detik berlalu). Teks berubah tiap detik sehingga hash visual unik tiap frame.</p>
+                </div>
+
+                <!-- ======= DURATION JITTER ======= -->
+                <div class="h-[44px] flex items-center justify-between bg-dark-700/60 px-3 rounded-lg border border-orange-700/70" title="Variasi durasi live secara acak agar durasi tidak selalu identik">
+                  <div class="flex items-center gap-1.5">
+                    <i class="ti ti-clock-play text-orange-400"></i>
+                    <label class="text-xs sm:text-sm text-orange-200 font-medium">Duration Jitter</label>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="durationJitterEnabled" name="durationJitterEnabled" class="sr-only peer" onchange="toggleDurationJitter(this.checked)">
+                    <div class="w-10 h-5 bg-dark-600 rounded-full peer peer-checked:bg-orange-500"></div>
+                    <div class="absolute left-[2px] top-[2px] w-4 h-4 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
+                  </label>
+                </div>
+                <!-- Duration Jitter Panel -->
+                <div id="durationJitterPanel" class="hidden space-y-2 bg-dark-900/80 p-3 rounded-lg border border-orange-800/50 mt-1">
+                  <div class="grid grid-cols-2 gap-2">
+                    <div>
+                      <label class="text-[11px] text-gray-400 block mb-1">Min Jitter (menit)</label>
+                      <input type="number" id="durationJitterMin" name="durationJitterMin" value="-7" min="-60" max="0"
+                        class="w-full h-8 px-2 bg-dark-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:border-orange-500" placeholder="-7">
+                    </div>
+                    <div>
+                      <label class="text-[11px] text-gray-400 block mb-1">Max Jitter (menit)</label>
+                      <input type="number" id="durationJitterMax" name="durationJitterMax" value="7" min="0" max="60"
+                        class="w-full h-8 px-2 bg-dark-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:border-orange-500" placeholder="7">
+                    </div>
+                  </div>
+                  <p class="text-[10px] text-orange-300/70"><i class="ti ti-info-circle mr-1"></i>Durasi live berubah acak antara <b>Durasi+Min</b> s.d. <b>Durasi+Max</b> menit. Rekomendasi: <b>-7 hingga +7</b>.</p>
+                </div>
+
+                <!-- ======= SCHEDULER JITTER ======= -->
+                <div class="h-[44px] flex items-center justify-between bg-dark-700/60 px-3 rounded-lg border border-cyan-700/70" title="Variasi waktu mulai secara acak agar jadwal tidak terprediksi seperti cron-job">
+                  <div class="flex items-center gap-1.5">
+                    <i class="ti ti-calendar-time text-cyan-400"></i>
+                    <label class="text-xs sm:text-sm text-cyan-200 font-medium">Scheduler Jitter</label>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="schedulerJitterEnabled" name="schedulerJitterEnabled" class="sr-only peer" onchange="toggleSchedulerJitter(this.checked)">
+                    <div class="w-10 h-5 bg-dark-600 rounded-full peer peer-checked:bg-cyan-500"></div>
+                    <div class="absolute left-[2px] top-[2px] w-4 h-4 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
+                  </label>
+                </div>
+                <!-- Scheduler Jitter Panel -->
+                <div id="schedulerJitterPanel" class="hidden space-y-2 bg-dark-900/80 p-3 rounded-lg border border-cyan-800/50 mt-1">
+                  <div class="grid grid-cols-2 gap-2">
+                    <div>
+                      <label class="text-[11px] text-gray-400 block mb-1">Min Jitter (menit)</label>
+                      <input type="number" id="schedulerJitterMin" name="schedulerJitterMin" value="2" min="0" max="60"
+                        class="w-full h-8 px-2 bg-dark-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:border-cyan-500" placeholder="2">
+                    </div>
+                    <div>
+                      <label class="text-[11px] text-gray-400 block mb-1">Max Jitter (menit)</label>
+                      <input type="number" id="schedulerJitterMax" name="schedulerJitterMax" value="8" min="0" max="60"
+                        class="w-full h-8 px-2 bg-dark-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:border-cyan-500" placeholder="8">
+                    </div>
+                  </div>
+                  <p class="text-[10px] text-cyan-300/70"><i class="ti ti-info-circle mr-1"></i>Waktu mulai digeser acak antara <b>+Min</b> s.d. <b>+Max</b> menit dari jadwal. Rekomendasi: <b>+2 hingga +8</b>.</p>
+                </div>
+
               </div>
 
               <!-- Audio Terpisah Container (Expandable) -->
@@ -2663,7 +2775,22 @@
         channelName: document.getElementById('channelName')?.value || '',
         useAdvancedSettings: !document.getElementById('advancedSettingsContent').classList.contains('hidden'),
         antiFingerprint: document.getElementById('antiFingerprint')?.checked || false,
-        spoofObs: document.getElementById('spoofObs')?.checked || false
+        spoofObs: document.getElementById('spoofObs')?.checked || false,
+        // Realtime Clock
+        clockEnabled: document.getElementById('clockEnabled')?.checked || false,
+        clockColor: document.getElementById('clockColor')?.value || '#FFFFFF',
+        clockSize: parseInt(document.getElementById('clockSize')?.value || '28'),
+        clockX: parseInt(document.getElementById('clockX')?.value || '10'),
+        clockY: parseInt(document.getElementById('clockY')?.value || '10'),
+        clockColorMode: document.getElementById('clockColorMode')?.value || 'static',
+        // Duration Jitter
+        durationJitterEnabled: document.getElementById('durationJitterEnabled')?.checked || false,
+        durationJitterMin: parseInt(document.getElementById('durationJitterMin')?.value || '-7'),
+        durationJitterMax: parseInt(document.getElementById('durationJitterMax')?.value || '7'),
+        // Scheduler Jitter
+        schedulerJitterEnabled: document.getElementById('schedulerJitterEnabled')?.checked || false,
+        schedulerJitterMin: parseInt(document.getElementById('schedulerJitterMin')?.value || '2'),
+        schedulerJitterMax: parseInt(document.getElementById('schedulerJitterMax')?.value || '8')
       };
       const scheduleStartTime = document.getElementById('scheduleStartTime')?.value;
       if (scheduleStartTime) {
@@ -2729,6 +2856,33 @@
           showToast('error', 'An error occurred while creating the stream');
         });
     });
+
+    // ===== Toggle functions untuk fitur anti-spam =====
+    function toggleClockOptions(checked) {
+      const panel = document.getElementById('clockOptionsPanel');
+      if (panel) panel.classList.toggle('hidden', !checked);
+    }
+    function toggleDurationJitter(checked) {
+      const panel = document.getElementById('durationJitterPanel');
+      if (panel) panel.classList.toggle('hidden', !checked);
+    }
+    function toggleSchedulerJitter(checked) {
+      const panel = document.getElementById('schedulerJitterPanel');
+      if (panel) panel.classList.toggle('hidden', !checked);
+    }
+    function toggleEditClockOptions(checked) {
+      const panel = document.getElementById('editClockOptionsPanel');
+      if (panel) panel.classList.toggle('hidden', !checked);
+    }
+    function toggleEditDurationJitter(checked) {
+      const panel = document.getElementById('editDurationJitterPanel');
+      if (panel) panel.classList.toggle('hidden', !checked);
+    }
+    function toggleEditSchedulerJitter(checked) {
+      const panel = document.getElementById('editSchedulerJitterPanel');
+      if (panel) panel.classList.toggle('hidden', !checked);
+    }
+
     let currentPage = 1;
     let currentLimit = 50;
     let currentSearch = '';
