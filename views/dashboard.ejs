@@ -520,10 +520,12 @@
                       <label class="text-[11px] text-gray-300 block mb-1 font-medium">Ukuran Font</label>
                       <select id="clockSize" name="clockSize" onchange="updateClockPreview(false)"
                         class="w-full bg-dark-700 border border-dark-600 rounded-lg h-[38px] px-3 text-sm text-white focus:outline-none focus:border-yellow-500">
+                        <option value="12">Sangat Kecil / Mini (12px)</option>
+                        <option value="14">Ekstra Kecil (14px)</option>
                         <option value="18">Kecil (18px)</option>
-                        <option value="28" selected>Sedang (28px)</option>
-                        <option value="40">Besar (40px)</option>
-                        <option value="56">Sangat Besar (56px)</option>
+                        <option value="24" selected>Sedang (24px)</option>
+                        <option value="32">Besar (32px)</option>
+                        <option value="44">Sangat Besar (44px)</option>
                       </select>
                     </div>
                     <div>
@@ -1287,10 +1289,12 @@
                       <label class="text-[11px] text-gray-300 block mb-1 font-medium">Ukuran Font</label>
                       <select id="editClockSize" name="clockSize" onchange="updateClockPreview(true)"
                         class="w-full bg-dark-700 border border-dark-600 rounded-lg h-[38px] px-3 text-sm text-white focus:outline-none focus:border-yellow-500">
+                        <option value="12">Sangat Kecil / Mini (12px)</option>
+                        <option value="14">Ekstra Kecil (14px)</option>
                         <option value="18">Kecil (18px)</option>
-                        <option value="28" selected>Sedang (28px)</option>
-                        <option value="40">Besar (40px)</option>
-                        <option value="56">Sangat Besar (56px)</option>
+                        <option value="24" selected>Sedang (24px)</option>
+                        <option value="32">Besar (32px)</option>
+                        <option value="44">Sangat Besar (44px)</option>
                       </select>
                     </div>
                     <div>
@@ -3110,7 +3114,7 @@
 
       // Terapkan style langsung ke elemen preview overlay
       overlay.style.color = displayColor;
-      overlay.style.fontSize = Math.max(11, Math.round(size * 0.55)) + 'px';
+      overlay.style.fontSize = Math.max(8, Math.round(size * 0.55)) + 'px';
 
       // Reset style koordinat
       overlay.style.left = 'auto';
@@ -4959,7 +4963,7 @@
       if (document.getElementById('editClockColorPicker')) document.getElementById('editClockColorPicker').value = stream.clock_color || '#FFFFFF';
       if (document.getElementById('editClockSize')) {
         const sz = String(stream.clock_size || 28);
-        const szOpts = ['18','28','40','56'];
+        const szOpts = ['12','14','18','24','32','44'];
         document.getElementById('editClockSize').value = szOpts.includes(sz) ? sz : '28';
       }
       if (document.getElementById('editClockX')) document.getElementById('editClockX').value = stream.clock_x !== undefined && stream.clock_x !== null ? stream.clock_x : 10;
