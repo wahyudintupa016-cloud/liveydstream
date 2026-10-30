@@ -119,35 +119,28 @@ function getAudioEncodingArgs(stream, fallbackBitrate = '192k') {
 /**
  * Build drawtext filter for Realtime Clock overlay (elapsed time).
  * @param {object} stream - stream object dengan field clock_*
- * @param {number} startEpoch - unix timestamp (detik) saat stream dimulai
  * @returns {string|null} filter string atau null jika tidak aktif
  */
-function getRealtimeClockFilter(stream, startEpoch) {
-  if (!stream.clock_enabled) return null;
+function getRealtimeClockFilter(stream) {
+  if (!stream || !stream.clock_enabled) return null;
 
   const color = stream.clock_color || '#FFFFFF';
-  const size = stream.clock_size || 28;
+  const size = parseInt(stream.clock_size || 24);
   const position = stream.clock_position || 'top_left';
-    const margin = 10;
-    let xExpr, yExpr;
-    if (position === 'top_left')         { xExpr = margin;           yExpr = margin; }
-    else if (position === 'top_center')  { xExpr = '(w-tw)/2';       yExpr = margin; }
-    else if (position === 'top_right')   { xExpr = `w-tw-${margin}`; yExpr = margin; }
-    else if (position === 'bottom_left') { xExpr = margin;           yExpr = `h-th-${margin}`; }
-    else if (position === 'bottom_center'){ xExpr = '(w-tw)/2';      yExpr = `h-th-${margin}`; }
-    else if (position === 'bottom_right'){ xExpr = `w-tw-${margin}`; yExpr = `h-th-${margin}`; }
-    else                                 { xExpr = margin;           yExpr = margin; }
+  const margin = 12;
+
+  let xExpr, yExpr;
+  if (position === 'top_left')          { xExpr = margin;           yExpr = margin; }
+  else if (position === 'top_center')   { xExpr = '(w-tw)/2';       yExpr = margin; }
+  else if (position === 'top_right')    { xExpr = `w-tw-${margin}`; yExpr = margin; }
+  else if (position === 'bottom_left')  { xExpr = margin;           yExpr = `h-th-${margin}`; }
+  else if (position === 'bottom_center'){ xExpr = '(w-tw)/2';       yExpr = `h-th-${margin}`; }
+  else if (position === 'bottom_right') { xExpr = `w-tw-${margin}`; yExpr = `h-th-${margin}`; }
+  else                                  { xExpr = margin;           yExpr = margin; }
+
   const mode = stream.clock_color_mode || 'static';
-
-  // elapsed menit:detik sejak stream mulai
-  const elapsed = `%{eif\\:(t - ${startEpoch}) / 60\\:d}\\:%{eif\\:mod(t - ${startEpoch}\\,60)\\:02d}`;
-
   let colorPart;
-  if (mode === 'random') {
-    // warna acak tiap 30 detik (R/G/B acak per detik)
-    colorPart = `fontcolor_expr='if(gte(mod(t\\,30)\\,15)\\,0xff%{eif\\:(random(1)*255)\\:02x}%{eif\\:(random(2)*255)\\:02x}\\,0x%{eif\\:(random(3)*255)\\:02x}ff%{eif\\:(random(4)*255)\\:02x})'`;
-  } else if (mode === 'daily') {
-    // Berganti warna otomatis setiap hari (Senin - Minggu)
+  if (mode === 'daily') {
     const dailyColors = [
       '0xFF5722', // Minggu: Deep Orange
       '0xFFEB3B', // Senin: Bright Yellow
@@ -160,20 +153,24 @@ function getRealtimeClockFilter(stream, startEpoch) {
     const dayOfWeek = new Date().getDay();
     const dailyHex = dailyColors[dayOfWeek] || '0xFFFFFF';
     colorPart = `fontcolor=${dailyHex}`;
+  } else if (mode === 'random') {
+    colorPart = "fontcolor_expr='if(gte(mod(t\,30)\,15)\,0xff%{eif\:(random(1)*255)\:02x}%{eif\:(random(2)*255)\:02x}\,0x%{eif\:(random(3)*255)\:02x}ff%{eif\:(random(4)*255)\:02x})'";
   } else {
-    // warna statik - konversi hex #RRGGBB => 0xRRGGBB
     const hexColor = (color || '#FFFFFF').replace('#', '0x');
     colorPart = `fontcolor=${hexColor}`;
   }
+
+  // Timer format elapsed jam:menit:detik murni (00:00:00) yang berjalan sejak stream mulai
+  const timerText = "text='%{pts\\:gmtime\\:0\\:%H\\\\\:%M\\\\\:%S}'";
 
   return [
     `drawtext=fontsize=${size}`,
     `x=${xExpr}`,
     `y=${yExpr}`,
-    `text='${elapsed}'`,
+    timerText,
     colorPart,
     `box=1`,
-    `boxcolor=black@0.4`,
+    `boxcolor=black@0.5`,
     `boxborderw=4`
   ].join(':');
 }
@@ -194,7 +191,66 @@ function applyDurationJitter(stream, baseDurationSec) {
 }
 
 
+
+/**
+ * Dapatkan argumen encoding video untuk FFmpeg.
+ * Jika Realtime Clock aktif, video di-encode dengan libx264 + drawtext filter.
+ * Jika Realtime Clock mati dan tidak pakai advanced settings, tetap stream copy (-c:v copy).
+ */
+function getVideoEncodingArgs(stream, clockFilter) {
+  if (clockFilter) {
+    const bitrate = stream.bitrate || 2500;
+    const fps = stream.fps || 30;
+    const vArgs = [
+      '-c:v', 'libx264',
+      '-preset', 'veryfast',
+      '-tune', 'zerolatency',
+      '-profile:v', 'high',
+      '-level', '4.1',
+      '-b:v', `${bitrate}k`,
+      '-maxrate', `${Math.round(bitrate * 1.1)}k`,
+      '-bufsize', `${bitrate * 2}k`,
+      '-pix_fmt', 'yuv420p',
+      '-g', String(fps * 2),
+      '-keyint_min', String(fps),
+      '-sc_threshold', '0',
+      '-r', String(fps),
+      '-vf', clockFilter
+    ];
+    if (stream.use_advanced_settings && stream.resolution) {
+      vArgs.push('-s', stream.resolution);
+    }
+    return vArgs;
+  }
+
+  if (!stream.use_advanced_settings) {
+    return ['-c:v', 'copy'];
+  }
+
+  const resolution = stream.resolution || '1280x720';
+  const bitrate = stream.bitrate || 2500;
+  const fps = stream.fps || 30;
+
+  return [
+    '-c:v', 'libx264',
+    '-preset', 'veryfast',
+    '-tune', 'zerolatency',
+    '-profile:v', 'high',
+    '-level', '4.1',
+    '-b:v', `${bitrate}k`,
+    '-maxrate', `${Math.round(bitrate * 1.1)}k`,
+    '-bufsize', `${bitrate * 2}k`,
+    '-pix_fmt', 'yuv420p',
+    '-g', String(fps * 2),
+    '-keyint_min', String(fps),
+    '-sc_threshold', '0',
+    '-s', resolution,
+    '-r', String(fps)
+  ];
+}
+
 async function buildFFmpegArgsForPlaylist(stream, playlist) {
+  const clockFilter = getRealtimeClockFilter(stream);
   if (!playlist.videos || playlist.videos.length === 0) {
     throw new Error('Playlist is empty');
   }
@@ -246,7 +302,7 @@ async function buildFFmpegArgsForPlaylist(stream, playlist) {
           '-f', 'concat',
           '-safe', '0',
           '-i', concatFile,
-          '-c:v', 'copy',
+          ...getVideoEncodingArgs(stream, clockFilter),
           ...afArgs,
           ...getObsSpoofMetadataArgs(stream),
       '-f', 'flv',
@@ -264,7 +320,7 @@ async function buildFFmpegArgsForPlaylist(stream, playlist) {
         '-f', 'concat',
         '-safe', '0',
         '-i', concatFile,
-        '-c:v', 'copy',
+        ...getVideoEncodingArgs(stream, clockFilter),
         '-c:a', 'copy',
         '-bsf:a', 'aac_adtstoasc',
         ...getObsSpoofMetadataArgs(stream),
@@ -351,7 +407,7 @@ async function buildFFmpegArgsForPlaylist(stream, playlist) {
       '-i', audioConcatFile,
       '-map', '0:v:0',
       '-map', '1:a:0',
-      '-c:v', 'copy',
+      ...getVideoEncodingArgs(stream, clockFilter),
       ...(afArgs || ['-c:a', 'copy']),
       ...getObsSpoofMetadataArgs(stream),
       '-f', 'flv',
@@ -544,7 +600,7 @@ async function buildFFmpegArgs(stream) {
           ...audioInputArgs,
           '-map', '0:v:0',
           '-map', '1:a:0',
-          '-c:v', 'copy',
+          ...getVideoEncodingArgs(stream, clockFilter),
           ...(afArgs || [
             '-c:a', 'aac',
             '-b:a', '192k',
@@ -589,6 +645,7 @@ async function buildFFmpegArgs(stream) {
           '-sc_threshold', '0',
           '-s', resolution,
           '-r', String(fps),
+          ...(clockFilter ? ['-vf', clockFilter] : []),
           ...(afArgs || [
             '-c:a', 'aac',
             '-b:a', '128k',
@@ -617,7 +674,7 @@ async function buildFFmpegArgs(stream) {
         '-avoid_negative_ts', 'make_zero',
         '-stream_loop', loopValue,
         '-i', videoPath,
-        '-c:v', 'copy',
+        ...getVideoEncodingArgs(stream, clockFilter),
         ...afArgs,
         ...getObsSpoofMetadataArgs(stream),
       '-f', 'flv',
@@ -635,7 +692,7 @@ async function buildFFmpegArgs(stream) {
       '-avoid_negative_ts', 'make_zero',
       '-stream_loop', loopValue,
       '-i', videoPath,
-      '-c:v', 'copy',
+      ...getVideoEncodingArgs(stream, clockFilter),
       '-c:a', 'copy',
       '-bsf:a', 'aac_adtstoasc',
       ...getObsSpoofMetadataArgs(stream),
@@ -673,6 +730,7 @@ async function buildFFmpegArgs(stream) {
     '-sc_threshold', '0',
     '-s', resolution,
     '-r', String(fps),
+    ...(clockFilter ? ['-vf', clockFilter] : []),
     '-c:a', 'aac',
     '-b:a', '128k',
     '-ar', '44100',
