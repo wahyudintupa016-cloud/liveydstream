@@ -1,3 +1,12 @@
+
+function calculateDailyScheduleJitter(stream) {
+  if (!stream || !stream.scheduler_jitter_enabled) return 0;
+  const minS = stream.scheduler_jitter_min != null ? stream.scheduler_jitter_min : 2;
+  const maxS = stream.scheduler_jitter_max != null ? stream.scheduler_jitter_max : 8;
+  const jitterMin = Math.floor(Math.random() * (maxS - minS + 1)) + minS;
+  const sign = Math.random() > 0.5 ? 1 : -1;
+  return sign * jitterMin * 60 * 1000;
+}
 ﻿const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
@@ -813,7 +822,21 @@ async function startStream(streamId, isRetry = false, baseUrl = null) {
     }
 
     const originalStartTime = stream.start_time;
-    const originalEndTime = stream.end_time;
+    let originalEndTime = stream.end_time;
+
+    // Terapkan Duration Jitter secara nyata pada end_time saat stream live dimulai
+    if (stream.duration && stream.duration_jitter_enabled) {
+      const baseMin = parseInt(stream.duration);
+      if (!isNaN(baseMin) && baseMin > 0) {
+        const minJ = stream.duration_jitter_min != null ? stream.duration_jitter_min : -7;
+        const maxJ = stream.duration_jitter_max != null ? stream.duration_jitter_max : 7;
+        const jitter = Math.floor(Math.random() * (maxJ - minJ + 1)) + minJ;
+        const finalMin = Math.max(1, baseMin + jitter);
+        originalEndTime = new Date(Date.now() + finalMin * 60000).toISOString();
+        await Stream.update(streamId, { end_time: originalEndTime });
+        addStreamLog(streamId, `[DurationJitter] Durasi live aktif: ${finalMin} menit (${jitter >= 0 ? '+' : ''}${jitter} menit jitter)`);
+      }
+    }
 
     if (stream.is_youtube_api) {
       const youtubeService = require('./youtubeService');
