@@ -3129,6 +3129,7 @@ app.post('/api/streams', isAuthenticated, [
       clock_x: parseInt(req.body.clockX) || 10,
       clock_y: parseInt(req.body.clockY) || 10,
       clock_color_mode: req.body.clockColorMode || 'static',
+      clock_position: req.body.clockPosition || 'top_left',
       duration_jitter_enabled: req.body.durationJitterEnabled === 'true' || req.body.durationJitterEnabled === true,
       duration_jitter_min: req.body.durationJitterMin !== undefined ? parseInt(req.body.durationJitterMin) : -7,
       duration_jitter_max: req.body.durationJitterMax !== undefined ? parseInt(req.body.durationJitterMax) : 7,
@@ -3497,6 +3498,7 @@ app.put('/api/streams/:id', isAuthenticated, uploadThumbnail.single('thumbnail')
       if (req.body.clockX !== undefined) updateData.clock_x = parseInt(req.body.clockX);
       if (req.body.clockY !== undefined) updateData.clock_y = parseInt(req.body.clockY);
       if (req.body.clockColorMode !== undefined) updateData.clock_color_mode = req.body.clockColorMode;
+      if (req.body.clockPosition !== undefined) updateData.clock_position = req.body.clockPosition;
       if (req.body.durationJitterEnabled !== undefined) updateData.duration_jitter_enabled = req.body.durationJitterEnabled === 'true' || req.body.durationJitterEnabled === true;
       if (req.body.durationJitterMin !== undefined) updateData.duration_jitter_min = parseInt(req.body.durationJitterMin);
       if (req.body.durationJitterMax !== undefined) updateData.duration_jitter_max = parseInt(req.body.durationJitterMax);

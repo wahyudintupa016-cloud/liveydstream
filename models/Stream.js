@@ -48,6 +48,7 @@ class Stream {
       clock_x = 10,
       clock_y = 10,
       clock_color_mode = 'static',
+      clock_position = 'top_left',
       // Duration Jitter
       duration_jitter_enabled = false,
       duration_jitter_min = -5,
@@ -77,10 +78,10 @@ class Stream {
           youtube_broadcast_id, youtube_stream_id, youtube_description, youtube_privacy, youtube_category, youtube_tags, youtube_thumbnail, youtube_channel_id, is_youtube_api, is_daily, channel_name,
           audio_mode, audio_id, audio_ids, current_audio_index,
           video_mode, video_ids, current_video_index, anti_fingerprint, spoof_obs,
-          clock_enabled, clock_color, clock_size, clock_x, clock_y, clock_color_mode,
+          clock_enabled, clock_color, clock_size, clock_x, clock_y, clock_color_mode, clock_position,
           duration_jitter_enabled, duration_jitter_min, duration_jitter_max,
           scheduler_jitter_enabled, scheduler_jitter_min, scheduler_jitter_max
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           id, title, video_id, rtmp_url, stream_key, platform, platform_icon,
           bitrate, resolution, fps, orientation, loop_video_int,
@@ -88,7 +89,7 @@ class Stream {
           youtube_broadcast_id, youtube_stream_id, youtube_description, youtube_privacy, youtube_category, youtube_tags, youtube_thumbnail, youtube_channel_id, is_youtube_api_int, is_daily_int, channel_name,
           audio_mode, audio_id, typeof audio_ids === 'object' ? JSON.stringify(audio_ids) : audio_ids, current_audio_index,
           video_mode, typeof video_ids === 'object' ? JSON.stringify(video_ids) : video_ids, current_video_index, anti_fingerprint_int, spoof_obs_int,
-          clock_enabled_int, clock_color, clock_size, clock_x, clock_y, clock_color_mode,
+          clock_enabled_int, clock_color, clock_size, clock_x, clock_y, clock_color_mode, clock_position,
           duration_jitter_enabled_int, duration_jitter_min, duration_jitter_max,
           scheduler_jitter_enabled_int, scheduler_jitter_min, scheduler_jitter_max
         ],

@@ -321,6 +321,12 @@ function createTables() {
         }
       });
 
+            db.run(`ALTER TABLE streams ADD COLUMN clock_position TEXT DEFAULT 'top_left'`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+          console.error('Error adding clock_position column:', err.message);
+        }
+      });
+
       db.run(`ALTER TABLE streams ADD COLUMN clock_color_mode TEXT DEFAULT 'static'`, (err) => {
         if (err && !err.message.includes('duplicate column name')) {
           console.error('Error adding clock_color_mode column:', err.message);

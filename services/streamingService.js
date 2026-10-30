@@ -127,8 +127,16 @@ function getRealtimeClockFilter(stream, startEpoch) {
 
   const color = stream.clock_color || '#FFFFFF';
   const size = stream.clock_size || 28;
-  const x = stream.clock_x || 10;
-  const y = stream.clock_y || 10;
+  const position = stream.clock_position || 'top_left';
+    const margin = 10;
+    let xExpr, yExpr;
+    if (position === 'top_left')         { xExpr = margin;           yExpr = margin; }
+    else if (position === 'top_center')  { xExpr = '(w-tw)/2';       yExpr = margin; }
+    else if (position === 'top_right')   { xExpr = `w-tw-${margin}`; yExpr = margin; }
+    else if (position === 'bottom_left') { xExpr = margin;           yExpr = `h-th-${margin}`; }
+    else if (position === 'bottom_center'){ xExpr = '(w-tw)/2';      yExpr = `h-th-${margin}`; }
+    else if (position === 'bottom_right'){ xExpr = `w-tw-${margin}`; yExpr = `h-th-${margin}`; }
+    else                                 { xExpr = margin;           yExpr = margin; }
   const mode = stream.clock_color_mode || 'static';
 
   // elapsed menit:detik sejak stream mulai
@@ -160,9 +168,9 @@ function getRealtimeClockFilter(stream, startEpoch) {
 
   return [
     `drawtext=fontsize=${size}`,
-    `x=${x}`,
-    `y=${y}`,
-    `text='Elapsed\\: ${elapsed}'`,
+    `x=${xExpr}`,
+    `y=${yExpr}`,
+    `text='${elapsed}'`,
     colorPart,
     `box=1`,
     `boxcolor=black@0.4`,

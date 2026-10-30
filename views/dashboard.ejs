@@ -479,7 +479,7 @@
                 <div id="clockOptionsPanel" class="hidden space-y-2 bg-dark-900/80 p-3 rounded-lg border border-yellow-800/50 mt-1">
                   <div class="grid grid-cols-2 gap-2">
                     <div>
-                      <label class="text-[11px] text-gray-400 block mb-1">Warna Teks (hex)</label>
+                      <label class="text-[11px] text-gray-400 block mb-1">Warna Font</label>
                       <div class="flex gap-1 items-center">
                         <input type="color" id="clockColorPicker" value="#FFFFFF" onchange="document.getElementById('clockColor').value=this.value; updateClockPreview(false);" class="w-8 h-8 rounded cursor-pointer border-0 bg-transparent">
                         <input type="text" id="clockColor" name="clockColor" value="#FFFFFF" placeholder="#FFFFFF"
@@ -491,30 +491,55 @@
                       <label class="text-[11px] text-gray-400 block mb-1">Mode Warna</label>
                       <select id="clockColorMode" name="clockColorMode" onchange="updateClockPreview(false);"
                         class="w-full h-8 px-2 bg-dark-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:border-yellow-500">
-                        <option value="static">Statik (tetap)</option>
-                        <option value="daily">Berganti warna tiap hari (Daily)</option>
-                        <option value="random">Acak tiap detik</option>
+                        <option value="static">Statik (Warna Pilihan)</option>
+                        <option value="daily">Ganti Tiap Hari (Senin-Minggu beda warna)</option>
+                        <option value="random">Acak Tiap Detik</option>
                       </select>
                     </div>
                   </div>
-                  <div class="grid grid-cols-3 gap-3">
-                    <div>
-                      <label class="text-[11px] text-gray-300 block mb-1 font-medium">Ukuran Font (px)</label>
-                      <input type="number" id="clockSize" name="clockSize" value="28" min="10" max="150" oninput="updateClockPreview(false);"
-                        class="w-full h-[38px] px-3 bg-dark-700 border border-gray-600 rounded-lg text-sm text-white font-mono focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500">
-                    </div>
-                    <div>
-                      <label class="text-[11px] text-gray-300 block mb-1 font-medium">Posisi X (Kiri px)</label>
-                      <input type="number" id="clockX" name="clockX" value="10" min="0" max="3840" oninput="updateClockPreview(false);"
-                        class="w-full h-[38px] px-3 bg-dark-700 border border-gray-600 rounded-lg text-sm text-white font-mono focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500">
-                    </div>
-                    <div>
-                      <label class="text-[11px] text-gray-300 block mb-1 font-medium">Posisi Y (Atas px)</label>
-                      <input type="number" id="clockY" name="clockY" value="10" min="0" max="2160" oninput="updateClockPreview(false);"
-                        class="w-full h-[38px] px-3 bg-dark-700 border border-gray-600 rounded-lg text-sm text-white font-mono focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500">
+
+                  <!-- Pilihan Warna Cepat (Presets) -->
+                  <div>
+                    <label class="text-[10px] text-gray-400 block mb-1">Pilihan Warna Cepat:</label>
+                    <div class="flex gap-1.5 flex-wrap">
+                      <button type="button" onclick="setClockColor('#FFFFFF', false)" style="background:#FFFFFF;" class="w-6 h-6 rounded-md border border-gray-500 cursor-pointer shadow-sm hover:scale-110 transition-transform" title="Putih"></button>
+                      <button type="button" onclick="setClockColor('#FFFF00', false)" style="background:#FFFF00;" class="w-6 h-6 rounded-md cursor-pointer shadow-sm hover:scale-110 transition-transform" title="Kuning"></button>
+                      <button type="button" onclick="setClockColor('#00FF00', false)" style="background:#00FF00;" class="w-6 h-6 rounded-md cursor-pointer shadow-sm hover:scale-110 transition-transform" title="Hijau"></button>
+                      <button type="button" onclick="setClockColor('#FF3B30', false)" style="background:#FF3B30;" class="w-6 h-6 rounded-md cursor-pointer shadow-sm hover:scale-110 transition-transform" title="Merah"></button>
+                      <button type="button" onclick="setClockColor('#00C7BE', false)" style="background:#00C7BE;" class="w-6 h-6 rounded-md cursor-pointer shadow-sm hover:scale-110 transition-transform" title="Cyan / Tosca"></button>
+                      <button type="button" onclick="setClockColor('#34C759', false)" style="background:#34C759;" class="w-6 h-6 rounded-md cursor-pointer shadow-sm hover:scale-110 transition-transform" title="Hijau Muda"></button>
+                      <button type="button" onclick="setClockColor('#007AFF', false)" style="background:#007AFF;" class="w-6 h-6 rounded-md cursor-pointer shadow-sm hover:scale-110 transition-transform" title="Biru"></button>
+                      <button type="button" onclick="setClockColor('#FF9500', false)" style="background:#FF9500;" class="w-6 h-6 rounded-md cursor-pointer shadow-sm hover:scale-110 transition-transform" title="Oranye"></button>
+                      <button type="button" onclick="setClockColor('#AF52DE', false)" style="background:#AF52DE;" class="w-6 h-6 rounded-md cursor-pointer shadow-sm hover:scale-110 transition-transform" title="Ungu"></button>
+                      <button type="button" onclick="setClockColor('#FF2D55', false)" style="background:#FF2D55;" class="w-6 h-6 rounded-md cursor-pointer shadow-sm hover:scale-110 transition-transform" title="Pink"></button>
                     </div>
                   </div>
-                  <p class="text-[10px] text-yellow-300/70"><i class="ti ti-info-circle mr-1"></i>Menampilkan <b>elapsed time</b> (menit:detik berlalu). Teks berubah tiap detik sehingga hash visual unik tiap frame.</p>
+
+                  <div class="grid grid-cols-2 gap-3 pt-1">
+                    <div>
+                      <label class="text-[11px] text-gray-300 block mb-1 font-medium">Ukuran Font</label>
+                      <select id="clockSize" name="clockSize" onchange="updateClockPreview(false)"
+                        class="w-full bg-dark-700 border border-dark-600 rounded-lg h-[38px] px-3 text-sm text-white focus:outline-none focus:border-yellow-500">
+                        <option value="18">Kecil (18px)</option>
+                        <option value="28" selected>Sedang (28px)</option>
+                        <option value="40">Besar (40px)</option>
+                        <option value="56">Sangat Besar (56px)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="text-[11px] text-gray-300 block mb-1 font-medium">Posisi Jam</label>
+                      <select id="clockPosition" name="clockPosition" onchange="updateClockPreview(false)"
+                        class="w-full bg-dark-700 border border-dark-600 rounded-lg h-[38px] px-3 text-sm text-white focus:outline-none focus:border-yellow-500">
+                        <option value="top_left" selected>↖ Pojok Kiri Atas</option>
+                        <option value="top_center">⬆ Pojok Tengah Atas</option>
+                        <option value="top_right">↗ Pojok Kanan Atas</option>
+                        <option value="bottom_left">↙ Pojok Kiri Bawah</option>
+                        <option value="bottom_center">⬇ Pojok Tengah Bawah</option>
+                        <option value="bottom_right">↘ Pojok Kanan Bawah</option>
+                      </select>
+                    </div>
+                  </div>
+                  <p class="text-[10px] text-yellow-300/70"><i class="ti ti-info-circle mr-1"></i>Menampilkan waktu durasi berjalan pada video (00:00:00). Posisi & warna dapat dilihat langsung pada layar preview video.</p>
                 </div>
 
                 <!-- ======= DURATION JITTER ======= -->
@@ -1221,7 +1246,7 @@
                 <div id="editClockOptionsPanel" class="hidden space-y-2 bg-dark-900/80 p-3 rounded-lg border border-yellow-800/50 mt-1">
                   <div class="grid grid-cols-2 gap-2">
                     <div>
-                      <label class="text-[11px] text-gray-400 block mb-1">Warna Teks (hex)</label>
+                      <label class="text-[11px] text-gray-400 block mb-1">Warna Font</label>
                       <div class="flex gap-1 items-center">
                         <input type="color" id="editClockColorPicker" value="#FFFFFF" onchange="document.getElementById('editClockColor').value=this.value; updateClockPreview(true);" class="w-8 h-8 rounded cursor-pointer border-0 bg-transparent">
                         <input type="text" id="editClockColor" name="clockColor" value="#FFFFFF" placeholder="#FFFFFF"
@@ -1233,30 +1258,55 @@
                       <label class="text-[11px] text-gray-400 block mb-1">Mode Warna</label>
                       <select id="editClockColorMode" name="clockColorMode" onchange="updateClockPreview(true);"
                         class="w-full h-8 px-2 bg-dark-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:border-yellow-500">
-                        <option value="static">Statik (tetap)</option>
-                        <option value="daily">Berganti warna tiap hari (Daily)</option>
-                        <option value="random">Acak tiap detik</option>
+                        <option value="static">Statik (Warna Pilihan)</option>
+                        <option value="daily">Ganti Tiap Hari (Senin-Minggu beda warna)</option>
+                        <option value="random">Acak Tiap Detik</option>
                       </select>
                     </div>
                   </div>
-                  <div class="grid grid-cols-3 gap-3">
-                    <div>
-                      <label class="text-[11px] text-gray-300 block mb-1 font-medium">Ukuran Font (px)</label>
-                      <input type="number" id="editClockSize" name="clockSize" value="28" min="10" max="150" oninput="updateClockPreview(true);"
-                        class="w-full h-[38px] px-3 bg-dark-700 border border-gray-600 rounded-lg text-sm text-white font-mono focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500">
-                    </div>
-                    <div>
-                      <label class="text-[11px] text-gray-300 block mb-1 font-medium">Posisi X (Kiri px)</label>
-                      <input type="number" id="editClockX" name="clockX" value="10" min="0" max="3840" oninput="updateClockPreview(true);"
-                        class="w-full h-[38px] px-3 bg-dark-700 border border-gray-600 rounded-lg text-sm text-white font-mono focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500">
-                    </div>
-                    <div>
-                      <label class="text-[11px] text-gray-300 block mb-1 font-medium">Posisi Y (Atas px)</label>
-                      <input type="number" id="editClockY" name="clockY" value="10" min="0" max="2160" oninput="updateClockPreview(true);"
-                        class="w-full h-[38px] px-3 bg-dark-700 border border-gray-600 rounded-lg text-sm text-white font-mono focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500">
+
+                  <!-- Pilihan Warna Cepat (Presets) -->
+                  <div>
+                    <label class="text-[10px] text-gray-400 block mb-1">Pilihan Warna Cepat:</label>
+                    <div class="flex gap-1.5 flex-wrap">
+                      <button type="button" onclick="setClockColor('#FFFFFF', true)" style="background:#FFFFFF;" class="w-6 h-6 rounded-md border border-gray-500 cursor-pointer shadow-sm hover:scale-110 transition-transform" title="Putih"></button>
+                      <button type="button" onclick="setClockColor('#FFFF00', true)" style="background:#FFFF00;" class="w-6 h-6 rounded-md cursor-pointer shadow-sm hover:scale-110 transition-transform" title="Kuning"></button>
+                      <button type="button" onclick="setClockColor('#00FF00', true)" style="background:#00FF00;" class="w-6 h-6 rounded-md cursor-pointer shadow-sm hover:scale-110 transition-transform" title="Hijau"></button>
+                      <button type="button" onclick="setClockColor('#FF3B30', true)" style="background:#FF3B30;" class="w-6 h-6 rounded-md cursor-pointer shadow-sm hover:scale-110 transition-transform" title="Merah"></button>
+                      <button type="button" onclick="setClockColor('#00C7BE', true)" style="background:#00C7BE;" class="w-6 h-6 rounded-md cursor-pointer shadow-sm hover:scale-110 transition-transform" title="Cyan / Tosca"></button>
+                      <button type="button" onclick="setClockColor('#34C759', true)" style="background:#34C759;" class="w-6 h-6 rounded-md cursor-pointer shadow-sm hover:scale-110 transition-transform" title="Hijau Muda"></button>
+                      <button type="button" onclick="setClockColor('#007AFF', true)" style="background:#007AFF;" class="w-6 h-6 rounded-md cursor-pointer shadow-sm hover:scale-110 transition-transform" title="Biru"></button>
+                      <button type="button" onclick="setClockColor('#FF9500', true)" style="background:#FF9500;" class="w-6 h-6 rounded-md cursor-pointer shadow-sm hover:scale-110 transition-transform" title="Oranye"></button>
+                      <button type="button" onclick="setClockColor('#AF52DE', true)" style="background:#AF52DE;" class="w-6 h-6 rounded-md cursor-pointer shadow-sm hover:scale-110 transition-transform" title="Ungu"></button>
+                      <button type="button" onclick="setClockColor('#FF2D55', true)" style="background:#FF2D55;" class="w-6 h-6 rounded-md cursor-pointer shadow-sm hover:scale-110 transition-transform" title="Pink"></button>
                     </div>
                   </div>
-                  <p class="text-[10px] text-yellow-300/70"><i class="ti ti-info-circle mr-1"></i>Menampilkan <b>elapsed time</b> (menit:detik). Posisi & warna dapat dilihat langsung di kotak preview video di samping!</p>
+
+                  <div class="grid grid-cols-2 gap-3 pt-1">
+                    <div>
+                      <label class="text-[11px] text-gray-300 block mb-1 font-medium">Ukuran Font</label>
+                      <select id="editClockSize" name="clockSize" onchange="updateClockPreview(true)"
+                        class="w-full bg-dark-700 border border-dark-600 rounded-lg h-[38px] px-3 text-sm text-white focus:outline-none focus:border-yellow-500">
+                        <option value="18">Kecil (18px)</option>
+                        <option value="28" selected>Sedang (28px)</option>
+                        <option value="40">Besar (40px)</option>
+                        <option value="56">Sangat Besar (56px)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="text-[11px] text-gray-300 block mb-1 font-medium">Posisi Jam</label>
+                      <select id="editClockPosition" name="clockPosition" onchange="updateClockPreview(true)"
+                        class="w-full bg-dark-700 border border-dark-600 rounded-lg h-[38px] px-3 text-sm text-white focus:outline-none focus:border-yellow-500">
+                        <option value="top_left" selected>↖ Pojok Kiri Atas</option>
+                        <option value="top_center">⬆ Pojok Tengah Atas</option>
+                        <option value="top_right">↗ Pojok Kanan Atas</option>
+                        <option value="bottom_left">↙ Pojok Kiri Bawah</option>
+                        <option value="bottom_center">⬇ Pojok Tengah Bawah</option>
+                        <option value="bottom_right">↘ Pojok Kanan Bawah</option>
+                      </select>
+                    </div>
+                  </div>
+                  <p class="text-[10px] text-yellow-300/70"><i class="ti ti-info-circle mr-1"></i>Menampilkan waktu durasi berjalan pada video (00:00:00). Posisi & warna dapat dilihat langsung pada layar preview video.</p>
                 </div>
 
                 <!-- ======= EDIT: DURATION JITTER ======= -->
@@ -2903,8 +2953,7 @@
         clockEnabled: document.getElementById('clockEnabled')?.checked || false,
         clockColor: document.getElementById('clockColor')?.value || '#FFFFFF',
         clockSize: parseInt(document.getElementById('clockSize')?.value || '28'),
-        clockX: parseInt(document.getElementById('clockX')?.value || '10'),
-        clockY: parseInt(document.getElementById('clockY')?.value || '10'),
+        clockPosition: document.getElementById('clockPosition')?.value || 'top_left',
         clockColorMode: document.getElementById('clockColorMode')?.value || 'static',
         // Duration Jitter
         durationJitterEnabled: document.getElementById('durationJitterEnabled')?.checked || false,
@@ -3025,6 +3074,16 @@
       return DAILY_PALETTE[day] || '#FFFFFF';
     }
 
+
+    function setClockColor(hex, isEdit) {
+      const colorId = isEdit ? 'editClockColor' : 'clockColor';
+      const pickerId = isEdit ? 'editClockColorPicker' : 'clockColorPicker';
+      const colorEl = document.getElementById(colorId);
+      const pickerEl = document.getElementById(pickerId);
+      if (colorEl) colorEl.value = hex;
+      if (pickerEl) pickerEl.value = hex;
+      updateClockPreview(isEdit);
+    }
     function updateClockPreview(isEdit = false) {
       const enabled = document.getElementById(isEdit ? 'editClockEnabled' : 'clockEnabled')?.checked || false;
       const overlay = document.getElementById(isEdit ? 'editClockPreviewOverlay' : 'clockPreviewOverlay');
@@ -3040,8 +3099,7 @@
       const colorMode = document.getElementById(isEdit ? 'editClockColorMode' : 'clockColorMode')?.value || 'static';
       const staticColor = document.getElementById(isEdit ? 'editClockColor' : 'clockColor')?.value || '#FFFFFF';
       const size = parseInt(document.getElementById(isEdit ? 'editClockSize' : 'clockSize')?.value || '28');
-      const x = parseInt(document.getElementById(isEdit ? 'editClockX' : 'clockX')?.value || '10');
-      const y = parseInt(document.getElementById(isEdit ? 'editClockY' : 'clockY')?.value || '10');
+      const position = document.getElementById(isEdit ? 'editClockPosition' : 'clockPosition')?.value || 'top_left';
 
       let displayColor = staticColor;
       if (colorMode === 'daily') {
@@ -3052,18 +3110,55 @@
 
       // Terapkan style langsung ke elemen preview overlay
       overlay.style.color = displayColor;
-      // Skala preview ukuran font agar proporsional di kotak preview (sekitar 50-60% dari ukuran render video)
-      overlay.style.fontSize = Math.max(10, Math.round(size * 0.55)) + 'px';
-      overlay.style.left = Math.max(4, Math.round(x * 0.35)) + 'px';
-      overlay.style.top = Math.max(4, Math.round(y * 0.35)) + 'px';
+      overlay.style.fontSize = Math.max(11, Math.round(size * 0.55)) + 'px';
+
+      // Reset style koordinat
+      overlay.style.left = 'auto';
+      overlay.style.right = 'auto';
+      overlay.style.top = 'auto';
+      overlay.style.bottom = 'auto';
+      overlay.style.transform = 'none';
+
+      const pad = '8px';
+      if (position === 'top_left') {
+        overlay.style.left = pad;
+        overlay.style.top = pad;
+      } else if (position === 'top_center') {
+        overlay.style.left = '50%';
+        overlay.style.top = pad;
+        overlay.style.transform = 'translateX(-50%)';
+      } else if (position === 'top_right') {
+        overlay.style.right = pad;
+        overlay.style.top = pad;
+      } else if (position === 'bottom_left') {
+        overlay.style.left = pad;
+        overlay.style.bottom = pad;
+      } else if (position === 'bottom_center') {
+        overlay.style.left = '50%';
+        overlay.style.bottom = pad;
+        overlay.style.transform = 'translateX(-50%)';
+      } else if (position === 'bottom_right') {
+        overlay.style.right = pad;
+        overlay.style.bottom = pad;
+      } else {
+        overlay.style.left = pad;
+        overlay.style.top = pad;
+      }
     }
 
-    // Sambungkan input change/input di modal Create Stream
-    ['clockColor', 'clockSize', 'clockX', 'clockY', 'clockColorMode'].forEach(id => {
+    // Sambungkan input change/input di modal Create Stream & Edit Stream
+    ['clockColor', 'clockColorMode', 'clockSize', 'clockPosition'].forEach(id => {
       const el = document.getElementById(id);
       if (el) {
         el.addEventListener('input', () => updateClockPreview(false));
         el.addEventListener('change', () => updateClockPreview(false));
+      }
+    });
+    ['editClockColor', 'editClockColorMode', 'editClockSize', 'editClockPosition'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', () => updateClockPreview(true));
+        el.addEventListener('change', () => updateClockPreview(true));
       }
     });
 
@@ -4862,7 +4957,11 @@
       }
       if (document.getElementById('editClockColor')) document.getElementById('editClockColor').value = stream.clock_color || '#FFFFFF';
       if (document.getElementById('editClockColorPicker')) document.getElementById('editClockColorPicker').value = stream.clock_color || '#FFFFFF';
-      if (document.getElementById('editClockSize')) document.getElementById('editClockSize').value = stream.clock_size || 28;
+      if (document.getElementById('editClockSize')) {
+        const sz = String(stream.clock_size || 28);
+        const szOpts = ['18','28','40','56'];
+        document.getElementById('editClockSize').value = szOpts.includes(sz) ? sz : '28';
+      }
       if (document.getElementById('editClockX')) document.getElementById('editClockX').value = stream.clock_x !== undefined && stream.clock_x !== null ? stream.clock_x : 10;
       if (document.getElementById('editClockY')) document.getElementById('editClockY').value = stream.clock_y !== undefined && stream.clock_y !== null ? stream.clock_y : 10;
       if (document.getElementById('editClockColorMode')) document.getElementById('editClockColorMode').value = stream.clock_color_mode || 'static';
@@ -5523,8 +5622,7 @@
             clockEnabled: document.getElementById('editClockEnabled')?.checked || false,
             clockColor: document.getElementById('editClockColor')?.value || '#FFFFFF',
             clockSize: parseInt(document.getElementById('editClockSize')?.value || '28'),
-            clockX: parseInt(document.getElementById('editClockX')?.value || '10'),
-            clockY: parseInt(document.getElementById('editClockY')?.value || '10'),
+            clockPosition: document.getElementById('editClockPosition')?.value || 'top_left',
             clockColorMode: document.getElementById('editClockColorMode')?.value || 'static',
             // Duration Jitter
             durationJitterEnabled: document.getElementById('editDurationJitterEnabled')?.checked || false,
